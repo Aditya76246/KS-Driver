@@ -10,6 +10,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import Animated, {
   FadeIn,
@@ -28,9 +29,12 @@ import CustomText from '../components/CustomText';
 const GREEN = '#2e7d32';
 
 export default function LoginScreen() {
+  const navigation = useNavigation();
   const [showOtp, setShowOtp] = useState(false);
   const [mobile, setMobile] = useState('');
   const [otp, setOtp] = useState('');
+  const [timer, setTimer] = useState(0);
+  const [canResend, setCanResend] = useState(false);
 
   const otpRef = useRef(null);
 
@@ -54,23 +58,69 @@ export default function LoginScreen() {
     }
   }, [showOtp]);
 
+  // 🔥 OTP Timer
+  useEffect(() => {
+    let interval;
+    if (showOtp && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    } else if (timer === 0 && showOtp) {
+      setCanResend(true);
+    }
+    return () => clearInterval(interval);
+  }, [timer, showOtp]);
+
+  // 🔥 Handle Send OTP
+  const handleSendOtp = () => {
+    setShowOtp(true);
+    setTimer(30);
+    setCanResend(false);
+  };
+
+  // 🔥 Handle Resend OTP
+  const handleResendOtp = () => {
+    setOtp('');
+    setTimer(30);
+    setCanResend(false);
+  };
+
+  // 🔥 Handle Verify OTP
+  const handleVerifyOtp = () => {
+    if (otp.length === 6) {
+      navigation.getParent()?.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Main',
+            params: { screen: 'Home' },
+          },
+        ],
+      });
+    } else {
+      alert('Please enter all 6 digits of OTP');
+    }
+  };
+
   // 🔥 OTP box renderer
   const renderOtpBoxes = () => {
     return (
-      <TouchableOpacity
-        activeOpacity={1}
-        onPress={() => otpRef.current?.focus()}
-        style={styles.otpContainer}
-      >
-        {[0, 1, 2, 3, 4, 5].map((_, index) => (
-          <View key={index} style={styles.otpBox(index === otp.length)}>
-            <Text style={styles.otpText}>
-              {otp[index] || ''}
-            </Text>
-          </View>
-        ))}
+      <View style={styles.otpContainer}>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => otpRef.current?.focus()}
+          style={styles.otpBoxesWrapper}
+        >
+          {[0, 1, 2, 3, 4, 5].map((_, index) => (
+            <View key={index} style={styles.otpBox(index === otp.length)}>
+              <CustomText style={styles.otpText}>
+                {otp[index] || ''}
+              </CustomText>
+            </View>
+          ))}
+        </TouchableOpacity>
 
-        {/* Hidden Input (FIXED) */}
+        {/* Hidden Input */}
         <TextInput
           ref={otpRef}
           value={otp}
@@ -78,8 +128,9 @@ export default function LoginScreen() {
           keyboardType="number-pad"
           maxLength={6}
           style={styles.hiddenInput}
+          pointerEvents="none"
         />
-      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -137,6 +188,27 @@ export default function LoginScreen() {
                   </CustomText>
 
                   {renderOtpBoxes()}
+
+                  {/* Resend OTP */}
+                  <View style={styles.resendContainer}>
+                    <CustomText style={styles.resendText}>
+                      Didn't receive OTP?{' '}
+                    </CustomText>
+                    <TouchableOpacity
+                      onPress={handleResendOtp}
+                      disabled={!canResend}
+                      activeOpacity={0.7}
+                    >
+                      <CustomText
+                        style={[
+                          styles.resendLink,
+                          { color: canResend ? GREEN : '#ccc' },
+                        ]}
+                      >
+                        {canResend ? 'Resend' : `Resend in ${timer}s`}
+                      </CustomText>
+                    </TouchableOpacity>
+                  </View>
                 </Animated.View>
               )}
 
@@ -144,7 +216,7 @@ export default function LoginScreen() {
               <TouchableOpacity
                 style={styles.primaryBtn}
                 activeOpacity={0.8}
-                onPress={() => setShowOtp(true)}
+                onPress={showOtp ? handleVerifyOtp : handleSendOtp}
               >
                 <CustomText style={styles.primaryText}>
                   {showOtp ? 'Verify OTP' : 'Send OTP'}
@@ -210,7 +282,7 @@ const styles = StyleSheet.create({
   },
 
   codeText: {
-    ...globalStyles.f14SemiBold,
+    ...globalStyles.f12Bold,
   },
 
   input: {
@@ -237,10 +309,14 @@ const styles = StyleSheet.create({
 
   // 🔥 OTP styles
   otpContainer: {
+    position: 'relative',
+  },
+
+  otpBoxesWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 12,
-    marginBottom: 10, 
+    marginBottom: 10,
   },
 
   otpBox: (isActive) => ({
@@ -256,13 +332,32 @@ const styles = StyleSheet.create({
 
   hiddenInput: {
     position: 'absolute',
-    width: 1,      // 👈 NOT 0
-    height: 1,     // 👈 NOT 0
-    opacity: 0.01, // 👈 NOT fully 0
+    width: '100%',
+    height: '100%',
+    opacity: 0,
   },
 
   otpText: {
     ...globalStyles.f16Bold,
+  },
+
+  // 🔥 Resend OTP styles
+  resendContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+
+  resendText: {
+    ...globalStyles.f12Regular,
+    color: '#666',
+  },
+
+  resendLink: {
+    ...globalStyles.f12Bold,
+    textDecorationLine: 'underline',
   },
 
 });
