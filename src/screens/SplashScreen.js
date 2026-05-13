@@ -1,0 +1,136 @@
+import React from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    Image,
+    ImageBackground,
+    TouchableOpacity,
+    StatusBar,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import SplashScreenBg from '../../assets/images/splashBg.png'
+import KSLogo from '../../assets/icons/iconpngplain2.png';
+import globalStyles from '../styles/globalStyles';
+
+export default function SplashScreen({ navigation }) {
+    return (
+        <View style={styles.container}>
+            <StatusBar style="dark" translucent backgroundColor="transparent" />
+            {/* Background */}
+            <ImageBackground
+                source={SplashScreenBg}
+                style={styles.bg}
+                resizeMode="cover"
+            >
+                {/* Top Content */}
+                <View style={styles.topContent}>
+                    <Image
+                        source={KSLogo}
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
+
+                    <Text style={styles.subtitle}>
+                        Smart Equipment. Stronger Farms.
+                    </Text>
+                </View>
+
+                {/* Bottom Card */}
+                <View style={styles.bottomContainer}>
+
+                    {/* Get Started Button */}
+                    <TouchableOpacity
+                        style={styles.primaryBtn}
+                        activeOpacity={0.8}
+                        onPress={() => navigation.navigate('Login')}
+                    >
+                        <View style={styles.iconCircle}>
+                            <Ionicons name="arrow-forward" size={20} color="#2e7d32" />
+                        </View>
+                        <Text style={styles.primaryText}>Get Started</Text>
+                    </TouchableOpacity>
+
+
+
+                </View>
+            </ImageBackground>
+        </View>
+    );
+}
+
+const GREEN = '#2e7d32';
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
+    bg: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+
+    topContent: {
+        alignItems: 'center',
+        marginTop: 240,
+    },
+    logo: {
+        width: 240,
+        height: 240,
+    },
+    subtitle: {
+        ...globalStyles.f12Bold,
+        color: '#444',
+    },
+
+    // Bottom Section
+    bottomContainer: {
+        backgroundColor: '#ffffffee',
+        paddingHorizontal: 40,
+        paddingVertical: 30,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+    },
+
+    primaryBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: GREEN,
+        padding: 16,
+        borderRadius: 30,
+        justifyContent: 'center',
+        // marginBottom: 45,
+        elevation: 3,
+    },
+    iconCircle: {
+        backgroundColor: '#fff',
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    primaryText: {
+        color: '#fff',
+        ...globalStyles.f14Bold,
+        fontWeight: '600',
+    },
+
+    secondaryBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1.5,
+        borderColor: GREEN,
+        padding: 14,
+        borderRadius: 30,
+        justifyContent: 'center',
+    },
+    secondaryText: {
+        color: GREEN,
+        fontSize: 16,
+        marginLeft: 8,
+        fontWeight: '500',
+    },
+});
