@@ -93,7 +93,7 @@ export default function LoginScreen() {
         routes: [
           {
             name: 'Main',
-            params: { screen: 'Home' },
+            params: { screen: 'HomeTab' },
           },
         ],
       });
