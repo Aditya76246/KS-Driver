@@ -5,8 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import CustomText from './CustomText';
 import globalStyles from '../styles/globalStyles';
+import { color } from '../styles/theme';
 
-const GREEN = '#168a2f';
 
 export default function CustomHeader({
   userName = 'Sourav',
@@ -38,7 +38,7 @@ export default function CustomHeader({
             style={styles.iconButton}
             android_ripple={{ color: '#edf4ef', borderless: true }}
           >
-            <Ionicons name="notifications-outline" size={20} color={GREEN} />
+            <Ionicons name="notifications-outline" size={20} color={color.GREEN} />
             {notificationCount > 0 && (
               <View style={styles.badge}>
                 <CustomText style={styles.badgeText}>
@@ -53,7 +53,7 @@ export default function CustomHeader({
             style={styles.iconButton}
             android_ripple={{ color: '#f1f3f4', borderless: true }}
           >
-            <Ionicons name="person-outline" size={20} color="#111" />
+            <Ionicons name="person-outline" size={20} color={color.TEXT_DARK} />
           </Pressable>
         </View>
       </View>
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   },
 
   brand: {
-    color: GREEN,
+    color: color.GREEN,
     ...globalStyles.f12Bold,
   },
 
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     height: 18,
     paddingHorizontal: 4,
     borderRadius: 9,
-    backgroundColor: '#ef0f0f',
+    backgroundColor: color.RED,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,

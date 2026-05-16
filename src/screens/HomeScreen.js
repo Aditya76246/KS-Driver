@@ -12,15 +12,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import CustomText from '../components/CustomText';
 import globalStyles from '../styles/globalStyles';
-
-const GREEN = '#2e7d32';
-const GREEN_DARK = '#1b6d24';
-const YELLOW = '#fec330';
-const SURFACE = '#f7fbf0';
-const SURFACE_LOW = '#f1f5eb';
-const SURFACE_CONTAINER = '#ebefe5';
-const BORDER = '#bfcaba';
-const RED_REJECT = '#ba1a1a';
+import { color } from '../styles/theme';
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 const BOOKING_REQUESTS = [
@@ -49,10 +41,10 @@ const BOOKING_REQUESTS = [
 ];
 
 const QUICK_ACTIONS = [
-  { id: 'BookingsTab', label: 'My Trips', icon: 'clipboard-list', lib: 'FontAwesome5', color: GREEN, bg: '#d4edda' },
-  { id: 'EarningsTab', label: 'Earnings', icon: 'cash-multiple', lib: 'MaterialCommunityIcons', color: '#795900', bg: '#fff3cd' },
-  { id: 'fuel', label: 'Fuel Log', icon: 'gas-station', lib: 'MaterialCommunityIcons', color: '#923357', bg: '#fce4ec' },
-  { id: 'support', label: 'Support', icon: 'headset', lib: 'MaterialCommunityIcons', color: '#40493d', bg: '#e0e4da' },
+  { id: 'BookingsTab', label: 'My Trips',  icon: 'clipboard-list',  lib: 'FontAwesome5',            color: color.GREEN,      bg: color.GREEN_LIGHT },
+  { id: 'EarningsTab', label: 'Earnings',  icon: 'cash-multiple',   lib: 'MaterialCommunityIcons',  color: color.YELLOW_TEXT, bg: color.YELLOW_BG },
+  { id: 'FuelTab',     label: 'Fuel Log',  icon: 'gas-station',     lib: 'MaterialCommunityIcons',  color: '#923357',         bg: '#fce4ec' },
+  { id: 'SupportTab',  label: 'Support',   icon: 'headset',         lib: 'MaterialCommunityIcons',  color: color.TEXT_SUB,    bg: color.AVATAR_BG },
 ];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -66,7 +58,7 @@ function OnlineToggle({ isOnline, onToggle }) {
     >
       <View style={[styles.toggleTrack, isOnline && styles.toggleTrackActive]}>
         <View style={[styles.toggleThumb, isOnline ? styles.thumbOnline : styles.thumbOffline]}>
-          <CustomText style={[styles.toggleLabel, { color: isOnline ? '#fff' : '#40493d' }]}>
+          <CustomText style={[styles.toggleLabel, { color: isOnline ? color.WHITE : color.TEXT_SUB }]}>
             {isOnline ? 'Online' : 'Offline'}
           </CustomText>
         </View>
@@ -80,7 +72,7 @@ function ProfileBanner({ onPress }) {
     <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.profileBanner}>
       <View style={styles.profileBannerLeft}>
         <View style={styles.profileWarningIcon}>
-          <Ionicons name="person-circle-outline" size={28} color={GREEN} />
+          <Ionicons name="person-circle-outline" size={28} color={color.GREEN} />
         </View>
         <View style={{ flex: 1 }}>
           <CustomText style={styles.profileBannerTitle}>Complete Your Profile & KYC</CustomText>
@@ -89,7 +81,7 @@ function ProfileBanner({ onPress }) {
       </View>
       <TouchableOpacity style={styles.profileBannerBtn} onPress={onPress} activeOpacity={0.8}>
         <CustomText style={styles.profileBannerBtnText}>Update</CustomText>
-        <Ionicons name="arrow-forward" size={14} color="#fff" style={{ marginLeft: 4 }} />
+        <Ionicons name="arrow-forward" size={14} color={color.WHITE} style={{ marginLeft: 4 }} />
       </TouchableOpacity>
     </Animated.View>
   );
@@ -102,7 +94,7 @@ function StatCard({ title, value, subtitle, progress, goal, delay = 0 }) {
       <CustomText style={styles.statCardValue}>{value}</CustomText>
       {subtitle ? (
         <View style={styles.statSubRow}>
-          <Ionicons name="trending-up" size={14} color={GREEN} />
+          <Ionicons name="trending-up" size={14} color={color.GREEN} />
           <CustomText style={styles.statSubText}>{subtitle}</CustomText>
         </View>
       ) : null}
@@ -156,28 +148,28 @@ function BookingCard({ booking, onAccept, onReject, delay = 0 }) {
       {/* Details Grid */}
       <View style={styles.bookingDetails}>
         <View style={styles.detailItem}>
-          <MaterialCommunityIcons name="tractor" size={16} color={GREEN} />
+          <MaterialCommunityIcons name="tractor" size={16} color={color.GREEN} />
           <View style={{ marginLeft: 6 }}>
             <CustomText style={styles.detailLabel}>EQUIPMENT</CustomText>
             <CustomText style={styles.detailValue}>{booking.equipment}</CustomText>
           </View>
         </View>
         <View style={styles.detailItem}>
-          <MaterialCommunityIcons name="grid" size={16} color={GREEN} />
+          <MaterialCommunityIcons name="grid" size={16} color={color.GREEN} />
           <View style={{ marginLeft: 6 }}>
             <CustomText style={styles.detailLabel}>AREA</CustomText>
             <CustomText style={styles.detailValue}>{booking.area}</CustomText>
           </View>
         </View>
         <View style={styles.detailItem}>
-          <Ionicons name="location-outline" size={16} color={GREEN} />
+          <Ionicons name="location-outline" size={16} color={color.GREEN} />
           <View style={{ marginLeft: 6 }}>
             <CustomText style={styles.detailLabel}>DISTANCE</CustomText>
             <CustomText style={styles.detailValue}>{booking.distance}</CustomText>
           </View>
         </View>
         <View style={styles.detailItem}>
-          <Ionicons name="time-outline" size={16} color={GREEN} />
+          <Ionicons name="time-outline" size={16} color={color.GREEN} />
           <View style={{ marginLeft: 6 }}>
             <CustomText style={styles.detailLabel}>TIMING</CustomText>
             <CustomText style={styles.detailValue}>{booking.timing}</CustomText>
@@ -203,7 +195,7 @@ function BookingCard({ booking, onAccept, onReject, delay = 0 }) {
 export default function HomeScreen({ navigation }) {
   const [isOnline, setIsOnline] = useState(true);
   const [bookings, setBookings] = useState(BOOKING_REQUESTS);
-  const [profileComplete] = useState(false); // set to true once profile/KYC is done
+  const [profileComplete] = useState(false);
 
   const handleAccept = (id) => {
     setBookings((prev) => prev.filter((b) => b.id !== id));
@@ -275,7 +267,7 @@ export default function HomeScreen({ navigation }) {
 
           {bookings.length === 0 ? (
             <View style={styles.emptyState}>
-              <MaterialCommunityIcons name="tractor-variant" size={40} color={BORDER} />
+              <Ionicons name="checkmark-circle-outline" size={48} color={color.BORDER} />
               <CustomText style={styles.emptyText}>No new booking requests</CustomText>
             </View>
           ) : (
@@ -285,7 +277,7 @@ export default function HomeScreen({ navigation }) {
                 booking={b}
                 onAccept={handleAccept}
                 onReject={handleReject}
-                delay={350 + i * 80}
+                delay={320 + i * 60}
               />
             ))
           )}
@@ -300,7 +292,7 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: SURFACE,
+    backgroundColor: color.SURFACE,
   },
 
   // ── Top Bar ──
@@ -308,37 +300,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingTop: 12,
     paddingBottom: 4,
   },
-
   toggleWrapper: {
     alignItems: 'flex-end',
   },
   toggleTrack: {
-    flexDirection: 'row',
-    backgroundColor: SURFACE_CONTAINER,
-    borderRadius: 999,
+    width: 110,
+    height: 36,
+    borderRadius: 99,
+    backgroundColor: color.AVATAR_BG,
+    justifyContent: 'center',
     padding: 3,
-    width: 140,
   },
   toggleTrackActive: {
-    backgroundColor: '#d4edda',
+    backgroundColor: color.GREEN_BG,
   },
   toggleThumb: {
-    borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
+    height: 30,
+    borderRadius: 99,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 12,
   },
   thumbOnline: {
-    backgroundColor: GREEN,
-    // shift to left when online
+    backgroundColor: color.GREEN,
+    alignSelf: 'flex-end',
   },
   thumbOffline: {
-    backgroundColor: '#e0e4da',
-    marginLeft: 'auto',
+    backgroundColor: color.WHITE,
+    alignSelf: 'flex-start',
   },
   toggleLabel: {
     ...globalStyles.f12Bold,
@@ -354,13 +346,13 @@ const styles = StyleSheet.create({
 
   // ── Profile Banner ──
   profileBanner: {
-    backgroundColor: '#fff',
+    backgroundColor: color.WHITE,
     borderRadius: 18,
     padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: '#a3f69c',
+    borderColor: color.BORDER_GREEN,
     gap: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -378,30 +370,30 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: '#d4edda',
+    backgroundColor: color.GREEN_LIGHT,
     justifyContent: 'center',
     alignItems: 'center',
   },
   profileBannerTitle: {
     ...globalStyles.f12Bold,
-    color: GREEN_DARK,
+    color: color.GREEN_DARK,
   },
   profileBannerSub: {
     ...globalStyles.f10Regular,
-    color: '#40493d',
+    color: color.TEXT_SUB,
     marginTop: 2,
   },
   profileBannerBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: GREEN,
+    backgroundColor: color.GREEN,
     paddingHorizontal: 14,
     paddingVertical: 9,
     borderRadius: 30,
   },
   profileBannerBtnText: {
     ...globalStyles.f12Bold,
-    color: '#fff',
+    color: color.WHITE,
   },
 
   // ── Stats ──
@@ -411,11 +403,11 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: color.WHITE,
     borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#e0e4da',
+    borderColor: color.BORDER_LIGHT,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -424,12 +416,12 @@ const styles = StyleSheet.create({
   },
   statCardTitle: {
     ...globalStyles.f12Regular,
-    color: '#40493d',
+    color: color.TEXT_SUB,
     marginBottom: 4,
   },
   statCardValue: {
     ...globalStyles.f20Bold,
-    color: GREEN,
+    color: color.GREEN,
     marginBottom: 4,
   },
   statSubRow: {
@@ -439,23 +431,23 @@ const styles = StyleSheet.create({
   },
   statSubText: {
     ...globalStyles.f10Regular,
-    color: GREEN,
+    color: color.GREEN,
   },
   statGoalText: {
     ...globalStyles.f16Bold,
-    color: '#181d17',
+    color: color.TEXT_MAIN,
     marginBottom: 8,
   },
   progressTrack: {
     flexDirection: 'row',
     height: 6,
     borderRadius: 99,
-    backgroundColor: SURFACE_CONTAINER,
+    backgroundColor: color.SURFACE_CONTAINER,
     overflow: 'hidden',
     marginTop: 4,
   },
   progressFill: {
-    backgroundColor: YELLOW,
+    backgroundColor: color.YELLOW,
     borderRadius: 99,
   },
 
@@ -470,11 +462,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...globalStyles.f14Bold,
-    color: '#181d17',
+    color: color.TEXT_MAIN,
   },
   seeAll: {
     ...globalStyles.f12Bold,
-    color: GREEN,
+    color: color.GREEN,
   },
 
   // ── Quick Actions ──
@@ -496,17 +488,17 @@ const styles = StyleSheet.create({
   },
   qaLabel: {
     ...globalStyles.f10Regular,
-    color: '#40493d',
+    color: color.TEXT_SUB,
     textAlign: 'center',
   },
 
   // ── Booking Card ──
   bookingCard: {
-    backgroundColor: '#fff',
+    backgroundColor: color.WHITE,
     borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#e0e4da',
+    borderColor: color.BORDER_LIGHT,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -522,36 +514,36 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 12,
-    backgroundColor: '#e0e4da',
+    backgroundColor: color.AVATAR_BG,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
   },
   bookingName: {
     ...globalStyles.f14Bold,
-    color: '#181d17',
+    color: color.TEXT_MAIN,
   },
   bookingService: {
     ...globalStyles.f12Regular,
-    color: '#40493d',
+    color: color.TEXT_SUB,
     marginTop: 2,
   },
   estimateBadge: {
-    backgroundColor: '#fff3cd',
+    backgroundColor: color.YELLOW_BG,
     borderRadius: 30,
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
   estimateText: {
     ...globalStyles.f12Bold,
-    color: '#795900',
+    color: color.YELLOW_TEXT,
   },
 
   // ── Details Grid ──
   bookingDetails: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    backgroundColor: SURFACE_LOW,
+    backgroundColor: color.SURFACE_LOW,
     borderRadius: 12,
     padding: 12,
     gap: 12,
@@ -563,13 +555,13 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     ...globalStyles.f10Regular,
-    color: '#707a6c',
+    color: color.TEXT_MUTED,
     letterSpacing: 0.4,
     marginBottom: 2,
   },
   detailValue: {
     ...globalStyles.f12Bold,
-    color: '#181d17',
+    color: color.TEXT_MAIN,
   },
 
   // ── Actions ──
@@ -580,7 +572,7 @@ const styles = StyleSheet.create({
   rejectBtn: {
     flex: 1,
     borderWidth: 2,
-    borderColor: RED_REJECT,
+    borderColor: color.RED_REJECT,
     borderRadius: 12,
     paddingVertical: 13,
     alignItems: 'center',
@@ -588,11 +580,11 @@ const styles = StyleSheet.create({
   },
   rejectText: {
     ...globalStyles.f14Bold,
-    color: RED_REJECT,
+    color: color.RED_REJECT,
   },
   acceptBtn: {
     flex: 1,
-    backgroundColor: GREEN,
+    backgroundColor: color.GREEN,
     borderRadius: 12,
     paddingVertical: 13,
     alignItems: 'center',
@@ -600,7 +592,7 @@ const styles = StyleSheet.create({
   },
   acceptText: {
     ...globalStyles.f14Bold,
-    color: '#fff',
+    color: color.WHITE,
   },
 
   // ── Empty State ──
@@ -612,6 +604,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     ...globalStyles.f12Regular,
-    color: '#707a6c',
+    color: color.TEXT_MUTED,
   },
 });

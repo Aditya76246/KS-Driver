@@ -4,9 +4,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
-  Platform,
 } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -23,21 +23,34 @@ const Tab = createBottomTabNavigator();
 
 const GREEN = '#2e7d32';
 const GREEN_LIGHT = '#d4edda';
-const SURFACE = '#f7fbf0';
 
 const TAB_CONFIG = [
-  { name: 'HomeTab',     label: 'Home',     icon: 'home',           iconOutline: 'home-outline'         },
-  { name: 'BookingsTab', label: 'Bookings', icon: 'clipboard',      iconOutline: 'clipboard-outline'    },
-  { name: 'EarningsTab', label: 'Earnings', icon: 'cash',           iconOutline: 'cash-outline'         },
-  { name: 'ProfileTab',  label: 'Profile',  icon: 'person-circle',  iconOutline: 'person-circle-outline'},
+  { name: 'HomeTab',     label: 'Home',     icon: 'home',           iconOutline: 'home-outline'          },
+  { name: 'BookingsTab', label: 'Bookings', icon: 'clipboard',      iconOutline: 'clipboard-outline'     },
+  { name: 'EarningsTab', label: 'Earnings', icon: 'cash',           iconOutline: 'cash-outline'          },
+  { name: 'ProfileTab',  label: 'Profile',  icon: 'person-circle',  iconOutline: 'person-circle-outline' },
 ];
+
+const TAB_ROOT_ROUTES = {
+  HomeTab: 'HomeMain',
+  BookingsTab: 'BookingsMain',
+  EarningsTab: 'EarningsMain',
+  ProfileTab: 'ProfileMain',
+};
+
+function isInnerStackScreen(route) {
+  const rootRouteName = TAB_ROOT_ROUTES[route.name];
+  const focusedRouteName = getFocusedRouteNameFromRoute(route);
+
+  return Boolean(focusedRouteName && focusedRouteName !== rootRouteName);
+}
 
 // ─── Animated Tab Button ──────────────────────────────────────────────────────
 
 function TabButton({ tab, isFocused, onPress, onLongPress }) {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const bgAnim = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(0)).current;
+  const scaleAnim   = useRef(new Animated.Value(1)).current;
+  const bgAnim      = useRef(new Animated.Value(0)).current;
+  const translateY  = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -61,13 +74,9 @@ function TabButton({ tab, isFocused, onPress, onLongPress }) {
     ]).start();
   }, [isFocused]);
 
-  const bgColor = bgAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['transparent', GREEN_LIGHT],
-  });
-
+  const bgColor  = bgAnim.interpolate({ inputRange: [0, 1], outputRange: ['transparent', GREEN_LIGHT] });
   const iconColor = isFocused ? GREEN : '#9aab96';
-  const iconName = isFocused ? tab.icon : tab.iconOutline;
+  const iconName  = isFocused ? tab.icon : tab.iconOutline;
 
   return (
     <TouchableOpacity
@@ -76,20 +85,8 @@ function TabButton({ tab, isFocused, onPress, onLongPress }) {
       activeOpacity={0.8}
       style={styles.tabButton}
     >
-      <Animated.View
-        style={[
-          styles.tabInner,
-          {
-            transform: [{ scale: scaleAnim }, { translateY }],
-          },
-        ]}
-      >
-        <Animated.View
-          style={[
-            styles.iconPill,
-            { backgroundColor: bgColor },
-          ]}
-        >
+      <Animated.View style={[styles.tabInner, { transform: [{ scale: scaleAnim }, { translateY }] }]}>
+        <Animated.View style={[styles.iconPill, { backgroundColor: bgColor }]}>
           <Ionicons name={iconName} size={22} color={iconColor} />
         </Animated.View>
         <CustomText
@@ -110,6 +107,15 @@ function TabButton({ tab, isFocused, onPress, onLongPress }) {
 
 function CustomTabBar({ state, descriptors, navigation }) {
   const insets = useSafeAreaInsets();
+
+  const focusedRoute      = state.routes[state.index];
+  const focusedDescriptor = descriptors[focusedRoute.key];
+  const tabBarStyle       = focusedDescriptor?.options?.tabBarStyle;
+
+  // Inner screens signal { display: 'none' } — honour it.
+  if (isInnerStackScreen(focusedRoute) || tabBarStyle?.display === 'none') {
+    return null;
+  }
 
   return (
     <View style={[styles.tabBarWrapper, { paddingBottom: insets.bottom }]}>
@@ -157,11 +163,20 @@ export default function MainTabNavigator() {
     <Tab.Navigator
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={({ navigation, route }) => ({
-        header: () => (
-          <CustomHeader
-            onProfilePress={() => navigation.navigate('ProfileTab')}
-          />
-        ),
+        // The CustomHeader is shown by default for every tab root.
+        // Individual inner screens set tabBarStyle: { display: 'none' } which
+        // also signals us to hide the header (we do that check below).
+        header: ({ options }) => {
+          // Hide CustomHeader when inner screen requests tab bar hidden
+          if (isInnerStackScreen(route) || options?.tabBarStyle?.display === 'none') {
+            return null;
+          }
+          return (
+            <CustomHeader
+              onProfilePress={() => navigation.navigate('ProfileTab')}
+            />
+          );
+        },
       })}
     >
       <Tab.Screen name="HomeTab"     component={HomeStackNavigator}     options={{ title: 'Home' }}     />
@@ -185,25 +200,21 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 12,
   },
-
   tabBar: {
     flexDirection: 'row',
     paddingTop: 18,
     paddingHorizontal: 8,
   },
-
   tabButton: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingBottom: 6,
   },
-
   tabInner: {
     alignItems: 'center',
     gap: 3,
   },
-
   iconPill: {
     width: 48,
     height: 32,
@@ -211,11 +222,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   tabLabel: {
     ...globalStyles.f10Regular,
   },
-
   tabLabelActive: {
     ...globalStyles.f10Bold,
     fontSize: 11,

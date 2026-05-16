@@ -2,6 +2,7 @@
 import { StyleSheet } from "react-native";
 // import { color } from "./theme";
 import { fonts } from "./fonts";
+import { color } from "./theme";
 
 export default StyleSheet.create({
   // Bootstrap styles ----------- start
@@ -75,36 +76,31 @@ export default StyleSheet.create({
 
 
   // Color styles ----------- start
-//   primary: {
-//     color: color.primary,
-//   },
-//   secondary: {
-//     color: color.secondary,
-//   },
-//   textWhite: {
-//     color: color.white,
-//   },
-//   textBlack: {
-//     color: color.black,
-//   },
-//   neutral100: {
-//     color: color.neutral[100],
-//   },
-//   neutral200: {
-//     color: color.neutral[200],
-//   },
-//   neutral300: {
-//     color: color.neutral[300],
-//   },
-//   neutral500: {
-//     color: color.neutral[500],
-//   },
-//   yellow:{
-//     color: color.yellow,
-//   },
-//   orange:{
-//     color: color.orange,
-//   },
+  green:{
+    color: color.GREEN,
+  },
+  greenDark:{
+    color: color.GREEN_DARK,
+  },
+  yellow:{
+    color: color.YELLOW,
+  },
+  surface:{
+    color: color.SURFACE,
+  },
+  surfaceLow:{
+    color: color.SURFACE_LOW,
+  },
+  surfaceContainer:{
+    color: color.SURFACE_CONTAINER,
+  },
+  border:{
+    color: color.BORDER,
+  },
+  redReject:{
+    color: color.RED_REJECT,
+  },  
+
   // Color styles .............. end
 
   // background color ----------- start
@@ -259,6 +255,9 @@ export default StyleSheet.create({
   },
   f14Bold: {
     ...fonts.regularBold,
+  },
+  f14Regular: {
+    ...fonts.regularRegular,
   },
   f16Bold: {
     ...fonts.mediumBold,
