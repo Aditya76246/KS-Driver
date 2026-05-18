@@ -16,29 +16,28 @@ import { color } from '../styles/theme';
 
 // ─── Profile completion steps ─────────────────────────────────────────────────
 const COMPLETION_STEPS = [
-  { id: 'basic',  label: 'Basic Details', icon: 'person-outline',        status: 'done'    },
-  { id: 'farm',   label: 'Farm Details',  icon: 'leaf-outline',          status: 'done'    },
-  { id: 'docs',   label: 'Documents',     icon: 'document-text-outline', status: 'partial', progress: '2/4' },
-  { id: 'bank',   label: 'Bank Details',  icon: 'business-outline',      status: 'partial', progress: '0/2' },
+  { id: 'basic', label: 'Basic Details', icon: 'person-outline', status: 'done' },
+  { id: 'farm', label: 'Driving Details', icon: 'leaf-outline', status: 'done' },
+  { id: 'bank', label: 'Bank Details', icon: 'business-outline', status: 'partial', progress: '0/2' },
 ];
 
 // ─── Menu sections ────────────────────────────────────────────────────────────
 const ACCOUNT_MENU = [
-  { id: 'PersonalInfo', label: 'Personal Information', sub: 'View and update your personal details',  icon: 'person-outline'        },
-  { id: 'docs',     label: 'My Documents',          sub: 'Manage your uploaded documents',         icon: 'document-text-outline' },
+  { id: 'PersonalInfo', label: 'Personal Information', sub: 'View and update your personal details', icon: 'person-outline' },
+  { id: 'Documents', label: 'My Documents', sub: 'Manage your uploaded documents', icon: 'document-text-outline' },
 ];
 
 const SUPPORT_MENU = [
-  { id: 'help',    label: 'Help & Support',       sub: 'Get help, chat or call us',         icon: 'headset-outline'            },
-  { id: 'about',   label: 'About Kisan Sahakar',  sub: 'Know more about the app',           icon: 'information-circle-outline' },
-  { id: 'terms',   label: 'Terms & Conditions',   sub: 'Read our terms and conditions',     icon: 'reader-outline'             },
-  { id: 'privacy', label: 'Privacy Policy',        sub: 'Read our privacy policy',           icon: 'lock-closed-outline'        },
+  { id: 'help', label: 'Help & Support', sub: 'Get help, chat or call us', icon: 'headset-outline' },
+  { id: 'about', label: 'About Kisan Sahakar', sub: 'Know more about the app', icon: 'information-circle-outline' },
+  { id: 'terms', label: 'Terms & Conditions', sub: 'Read our terms and conditions', icon: 'reader-outline' },
+  { id: 'privacy', label: 'Privacy Policy', sub: 'Read our privacy policy', icon: 'lock-closed-outline' },
 ];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function CompletionStep({ step }) {
-  const isDone    = step.status === 'done';
+  const isDone = step.status === 'done';
   const isPartial = step.status === 'partial';
 
   return (
@@ -78,7 +77,7 @@ function MenuItem({ item, onPress, isLast }) {
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function ProfileScreen({ navigation }) {
-  const completionPct = 70;
+  const completionPct = 66;
 
   const handleMenuPress = (id) => {
     navigation.navigate(id);
@@ -147,7 +146,7 @@ export default function ProfileScreen({ navigation }) {
               <CustomText style={styles.completionTitle}>Profile Completion</CustomText>
               <CustomText style={styles.completionSub}>Complete your profile to get better experience</CustomText>
             </View>
-            <TouchableOpacity style={styles.completeNowBtn} activeOpacity={0.85}>
+            <TouchableOpacity style={styles.completeNowBtn} onPress={() => handleMenuPress('PersonalInfo')} activeOpacity={0.85}>
               <CustomText style={styles.completeNowText}>Complete Now</CustomText>
             </TouchableOpacity>
           </View>

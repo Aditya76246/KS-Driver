@@ -80,7 +80,6 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 
-  // ── Title (absolutely centred between the two side slots) ──
   titleContainer: {
     flex: 1,
     alignItems: 'center',
@@ -91,9 +90,8 @@ const styles = StyleSheet.create({
     color: color.TEXT_MAIN,
   },
 
-  // ── Right slot ──
   rightSlot: {
-    width: 40,          // mirror the back-btn width so title stays centred
+    width: 40,          
     alignItems: 'flex-end',
   },
   placeholder: {

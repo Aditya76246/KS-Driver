@@ -25,8 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import SplashScreenBg from '../../assets/images/loginBg.png';
 import globalStyles from '../styles/globalStyles';
 import CustomText from '../components/CustomText';
-
-const GREEN = '#2e7d32';
+import { color } from '../styles/theme';
 
 export default function LoginScreen() {
   const navigation = useNavigation();
@@ -155,16 +154,16 @@ export default function LoginScreen() {
               style={[styles.bottomContainer, animatedStyle]}
               layout={Layout.springify()}
             >
+              <CustomText style={styles.secTitle}>SECURE LOGIN</CustomText>
+
               <CustomText style={styles.title}>Welcome to Kisan Sahakar!</CustomText>
-              <CustomText style={styles.subtitle}>Login to continue</CustomText>
+              <CustomText style={styles.subtitle}>We'll send a one-time code to your phone to access your dashboard </CustomText>
 
               {/* Mobile */}
               <CustomText style={styles.label}>Mobile Number</CustomText>
 
-              <View style={styles.inputRow}>
-                <View style={styles.countryCode}>
-                  <CustomText style={styles.codeText}>+91</CustomText>
-                </View>
+              <View style={styles.inputContainer}>
+                <CustomText style={styles.prefix}>+91</CustomText>
 
                 <TextInput
                   placeholder="Enter mobile number"
@@ -202,7 +201,7 @@ export default function LoginScreen() {
                       <CustomText
                         style={[
                           styles.resendLink,
-                          { color: canResend ? GREEN : '#ccc' },
+                          { color: canResend ? color.GREEN : '#ccc' },
                         ]}
                       >
                         {canResend ? 'Resend' : `Resend in ${timer}s`}
@@ -253,49 +252,55 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    ...globalStyles.f16Bold,
+    ...globalStyles.f24ExtraBold,
+  },
+   secTitle: {
+    ...globalStyles.f16ExtraBold,
+    color:color.GREEN,
+    fontWeight:1600
   },
 
   subtitle: {
     color: '#777',
     marginBottom: 20,
-    ...globalStyles.f10Regular,
+    marginTop:4,
+    ...globalStyles.f12Bold,
   },
 
   label: {
     fontSize: 14,
-    ...globalStyles.f12Bold,
+    ...globalStyles.f16ExtraBold,
     marginBottom: 8,
   },
 
-  inputRow: {
+  inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-
-  countryCode: {
-    backgroundColor: '#f1f1f1',
-    paddingHorizontal: 14,
-    paddingVertical: 14,
+    backgroundColor: color.SURFACE,
     borderRadius: 12,
-    marginRight: 10,
+    borderWidth: 1,
+    borderColor: color.BORDER_GREEN,
+    paddingLeft: 50, // space for +91
   },
 
-  codeText: {
-    ...globalStyles.f12Bold,
+  prefix: {
+    position: 'absolute',
+    left: 15,
+    ...globalStyles.f16Bold,
+    // color: '#555',
   },
 
   input: {
     flex: 1,
-    backgroundColor: '#f7f7f7',
-    padding: 14,
-    borderRadius: 12,
+    paddingVertical: 18,
+    paddingRight: 15,
+    ...globalStyles.f16Regular,
   },
 
   primaryBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: GREEN,
+    backgroundColor: color.GREEN,
     padding: 16,
     borderRadius: 30,
     justifyContent: 'center',
@@ -304,7 +309,7 @@ const styles = StyleSheet.create({
 
   primaryText: {
     color: '#fff',
-    ...globalStyles.f14Bold,
+    ...globalStyles.f16Bold,
   },
 
   // 🔥 OTP styles
@@ -351,12 +356,12 @@ const styles = StyleSheet.create({
   },
 
   resendText: {
-    ...globalStyles.f12Regular,
+    ...globalStyles.f14Regular,
     color: '#666',
   },
 
   resendLink: {
-    ...globalStyles.f12Bold,
+    ...globalStyles.f14Bold,
     textDecorationLine: 'underline',
   },
 

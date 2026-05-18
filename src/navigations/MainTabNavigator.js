@@ -18,11 +18,9 @@ import HomeStackNavigator from './HomeStackNavigator';
 import BookingsStackNavigator from './BookingsStackNavigator';
 import EarningsStackNavigator from './EarningsStackNavigator';
 import ProfileStackNavigator from './ProfileStackNavigator';
+import { color } from '../styles/theme';
 
 const Tab = createBottomTabNavigator();
-
-const GREEN = '#2e7d32';
-const GREEN_LIGHT = '#d4edda';
 
 const TAB_CONFIG = [
   { name: 'HomeTab',     label: 'Home',     icon: 'home',           iconOutline: 'home-outline'          },
@@ -74,8 +72,8 @@ function TabButton({ tab, isFocused, onPress, onLongPress }) {
     ]).start();
   }, [isFocused]);
 
-  const bgColor  = bgAnim.interpolate({ inputRange: [0, 1], outputRange: ['transparent', GREEN_LIGHT] });
-  const iconColor = isFocused ? GREEN : '#9aab96';
+  const bgColor  = bgAnim.interpolate({ inputRange: [0, 1], outputRange: ['transparent', color.GREEN_LIGHT] });
+  const iconColor = isFocused ? color.GREEN : '#9aab96';
   const iconName  = isFocused ? tab.icon : tab.iconOutline;
 
   return (
@@ -92,7 +90,7 @@ function TabButton({ tab, isFocused, onPress, onLongPress }) {
         <CustomText
           style={[
             styles.tabLabel,
-            { color: isFocused ? GREEN : '#9aab96' },
+            { color: isFocused ? color.GREEN : '#9aab96' },
             isFocused && styles.tabLabelActive,
           ]}
         >
@@ -227,6 +225,5 @@ const styles = StyleSheet.create({
   },
   tabLabelActive: {
     ...globalStyles.f10Bold,
-    fontSize: 11,
   },
 });

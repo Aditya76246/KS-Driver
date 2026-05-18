@@ -10,6 +10,11 @@ export const color = {
   YELLOW_BG: '#fff3cd',
   YELLOW_TEXT: '#795900',
 
+  // Oranges
+  ORANGE: '#e38900',
+  ORANGE_BG: '#fff3e0',
+  ORANGE_TEXT: '#7f4c00',
+
   // ── Surfaces ──
   WHITE: '#ffffff',
   SURFACE: '#f7fbf0',
@@ -25,7 +30,7 @@ export const color = {
   // ── Borders ──
   BORDER: '#bfcaba',
   BORDER_LIGHT: '#e0e4da',
-  BORDER_GREEN: '#a3f69c',
+  BORDER_GREEN: '#0f8105',
   BORDER_RED: '#ffd6d6',
 
   // ── Reds ──

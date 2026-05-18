@@ -18,9 +18,12 @@ export default function CustomHeader({
 }) {
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="light-content" backgroundColor={color.GREEN_DARK} />
 
       <View style={styles.container}>
+        <View style={[styles.iconButton, { backgroundColor: 'rgba(255,255,255,0.3)',marginRight: 8 }]}>
+          <Ionicons name="location-outline" size={20} color={color.WHITE} />
+        </View>
         <View style={styles.copy}>
           <CustomText style={styles.title} numberOfLines={1}>
             Hello, {userName} <CustomText style={styles.wave}>{'\uD83D\uDC4B'}</CustomText>
@@ -63,7 +66,7 @@ export default function CustomHeader({
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: '#fff',
+    backgroundColor: color.GREEN_DARK,
   },
 
   container: {
@@ -71,7 +74,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingTop: 10,
     paddingBottom: 14,
-    backgroundColor: '#fff',
+    backgroundColor: color.GREEN_DARK,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -85,7 +88,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    color: '#101114',
+    color: '#fff',
     ...globalStyles.f16Bold,
   },
 
@@ -96,16 +99,16 @@ const styles = StyleSheet.create({
   subtitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 2,
+    // marginTop: 2,
   },
 
   subtitle: {
-    color: '#65656a',
+    color: '#ffffff',
     ...globalStyles.f12Regular,
   },
 
   brand: {
-    color: color.GREEN,
+    color: color.ORANGE,
     ...globalStyles.f12Bold,
   },
 

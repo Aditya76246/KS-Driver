@@ -222,7 +222,7 @@ export default function HomeScreen({ navigation }) {
       >
         {/* Profile completion banner */}
         {!profileComplete && (
-          <ProfileBanner onPress={() => navigation.navigate('ProfileTab')} />
+          <ProfileBanner onPress={() => navigation.navigate('ProfileTab', { screen: 'PersonalInfo' })} />
         )}
 
         {/* Stats Row */}

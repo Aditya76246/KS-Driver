@@ -12,6 +12,9 @@ import { Ionicons } from '@expo/vector-icons';
 import SplashScreenBg from '../../assets/images/splashBg.png'
 import KSLogo from '../../assets/icons/iconpngplain2.png';
 import globalStyles from '../styles/globalStyles';
+import { color } from '../styles/theme';
+import CustomText from '../components/CustomText';
+import ChooseLanguage from '../components/ChooseLanguage';
 
 export default function SplashScreen({ navigation }) {
     return (
@@ -31,9 +34,9 @@ export default function SplashScreen({ navigation }) {
                         resizeMode="contain"
                     />
 
-                    <Text style={styles.subtitle}>
+                    <CustomText style={styles.subtitle}>
                         Smart Equipment. Stronger Farms.
-                    </Text>
+                    </CustomText>
                 </View>
 
                 {/* Bottom Card */}
@@ -48,10 +51,19 @@ export default function SplashScreen({ navigation }) {
                         <View style={styles.iconCircle}>
                             <Ionicons name="arrow-forward" size={20} color="#2e7d32" />
                         </View>
-                        <Text style={styles.primaryText}>Get Started</Text>
+                        <CustomText style={styles.primaryText}>Get Started</CustomText>
                     </TouchableOpacity>
 
-
+                    <TouchableOpacity
+                        style={styles.primaryBtnLang}
+                        activeOpacity={0.8}
+                        onPress={() => navigation.navigate('ChooseLanguage')}
+                    >
+                        <View style={styles.iconCircle}>
+                            <Ionicons name="globe-outline" size={20} color={color.ORANGE}/>
+                        </View>
+                        <CustomText style={styles.primaryText}>Choose Language</CustomText>
+                    </TouchableOpacity>
 
                 </View>
             </ImageBackground>
@@ -86,7 +98,7 @@ const styles = StyleSheet.create({
 
     // Bottom Section
     bottomContainer: {
-        backgroundColor: '#ffffffee',
+        backgroundColor: '#ffffffd2',
         paddingHorizontal: 40,
         paddingVertical: 30,
         borderTopLeftRadius: 20,
@@ -96,11 +108,21 @@ const styles = StyleSheet.create({
     primaryBtn: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: GREEN,
+        backgroundColor: color.GREEN,
         padding: 16,
         borderRadius: 30,
         justifyContent: 'center',
         // marginBottom: 45,
+        elevation: 3,
+    },
+    primaryBtnLang: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: color.ORANGE,
+        padding: 16,
+        borderRadius: 30,
+        justifyContent: 'center',
+        marginTop: 15,
         elevation: 3,
     },
     iconCircle: {
@@ -115,22 +137,20 @@ const styles = StyleSheet.create({
     primaryText: {
         color: '#fff',
         ...globalStyles.f14Bold,
-        fontWeight: '600',
     },
 
     secondaryBtn: {
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1.5,
-        borderColor: GREEN,
+        borderColor: color.GREEN,
         padding: 14,
         borderRadius: 30,
         justifyContent: 'center',
     },
     secondaryText: {
-        color: GREEN,
+        color: color.GREEN,
         fontSize: 16,
         marginLeft: 8,
-        fontWeight: '500',
     },
 });

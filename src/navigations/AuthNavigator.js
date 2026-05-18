@@ -3,6 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import SplashScreen from "../screens/SplashScreen";
+import ChooseLanguage from "../components/ChooseLanguage";
 
 const Stack = createStackNavigator();
 
@@ -12,6 +13,7 @@ export default function AuthNavigator() {
       <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="ChooseLanguage" component={ChooseLanguage} />
     </Stack.Navigator>
   );
 }

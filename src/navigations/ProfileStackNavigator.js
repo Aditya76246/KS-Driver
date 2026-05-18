@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import ProfileScreen from '../screens/ProfileScreen';
 import PersonalInfoScreen from '../screens/PersonalInfoScreen';
+import DocumentsScreen from '../screens/DocumentsScreen';
 
 const Stack = createStackNavigator();
 
@@ -26,15 +27,11 @@ export default function ProfileStackNavigator() {
         }}
       />
 
-      {/*
-        Template for future inner screens:
-
-        <Stack.Screen
-          name="FarmDetails"
-          component={FarmDetailsScreen}
-          options={{ tabBarStyle: { display: 'none' } }}
-        />
-      */}
+      <Stack.Screen
+        name="Documents"
+        component={DocumentsScreen}
+        options={{ tabBarStyle: { display: 'none' } }}
+      />
 
     </Stack.Navigator>
   );
