@@ -92,7 +92,6 @@ export default function ProfileScreen({ navigation }) {
 
   return (
     <View style={styles.root}>
-      <StatusBar style="dark" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

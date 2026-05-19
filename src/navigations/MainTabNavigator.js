@@ -23,10 +23,10 @@ import { color } from '../styles/theme';
 const Tab = createBottomTabNavigator();
 
 const TAB_CONFIG = [
-  { name: 'HomeTab',     label: 'Home',     icon: 'home',           iconOutline: 'home-outline'          },
-  { name: 'BookingsTab', label: 'Bookings', icon: 'clipboard',      iconOutline: 'clipboard-outline'     },
-  { name: 'EarningsTab', label: 'Earnings', icon: 'cash',           iconOutline: 'cash-outline'          },
-  { name: 'ProfileTab',  label: 'Profile',  icon: 'person-circle',  iconOutline: 'person-circle-outline' },
+  { name: 'HomeTab', label: 'Home', icon: 'home', iconOutline: 'home-outline' },
+  { name: 'BookingsTab', label: 'Bookings', icon: 'clipboard', iconOutline: 'clipboard-outline' },
+  { name: 'EarningsTab', label: 'Earnings', icon: 'cash', iconOutline: 'cash-outline' },
+  { name: 'ProfileTab', label: 'Profile', icon: 'person-circle', iconOutline: 'person-circle-outline' },
 ];
 
 const TAB_ROOT_ROUTES = {
@@ -46,9 +46,9 @@ function isInnerStackScreen(route) {
 // ─── Animated Tab Button ──────────────────────────────────────────────────────
 
 function TabButton({ tab, isFocused, onPress, onLongPress }) {
-  const scaleAnim   = useRef(new Animated.Value(1)).current;
-  const bgAnim      = useRef(new Animated.Value(0)).current;
-  const translateY  = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const bgAnim = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -72,9 +72,9 @@ function TabButton({ tab, isFocused, onPress, onLongPress }) {
     ]).start();
   }, [isFocused]);
 
-  const bgColor  = bgAnim.interpolate({ inputRange: [0, 1], outputRange: ['transparent', color.GREEN_LIGHT] });
+  const bgColor = bgAnim.interpolate({ inputRange: [0, 1], outputRange: ['transparent', color.GREEN_LIGHT] });
   const iconColor = isFocused ? color.GREEN : '#9aab96';
-  const iconName  = isFocused ? tab.icon : tab.iconOutline;
+  const iconName = isFocused ? tab.icon : tab.iconOutline;
 
   return (
     <TouchableOpacity
@@ -106,9 +106,9 @@ function TabButton({ tab, isFocused, onPress, onLongPress }) {
 function CustomTabBar({ state, descriptors, navigation }) {
   const insets = useSafeAreaInsets();
 
-  const focusedRoute      = state.routes[state.index];
+  const focusedRoute = state.routes[state.index];
   const focusedDescriptor = descriptors[focusedRoute.key];
-  const tabBarStyle       = focusedDescriptor?.options?.tabBarStyle;
+  const tabBarStyle = focusedDescriptor?.options?.tabBarStyle;
 
   // Inner screens signal { display: 'none' } — honour it.
   if (isInnerStackScreen(focusedRoute) || tabBarStyle?.display === 'none') {
@@ -130,8 +130,15 @@ function CustomTabBar({ state, descriptors, navigation }) {
               target: route.key,
               canPreventDefault: true,
             });
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name);
+            if (!event.defaultPrevented) {
+              if (isFocused) {
+                // Already on this tab — pop back to root screen of its stack
+                navigation.navigate(route.name, {
+                  screen: TAB_ROOT_ROUTES[route.name],
+                });
+              } else {
+                navigation.navigate(route.name);
+              }
             }
           };
 
@@ -160,27 +167,20 @@ export default function MainTabNavigator() {
   return (
     <Tab.Navigator
       tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={({ navigation, route }) => ({
-        // The CustomHeader is shown by default for every tab root.
-        // Individual inner screens set tabBarStyle: { display: 'none' } which
-        // also signals us to hide the header (we do that check below).
+      screenOptions={({ route }) => ({
         header: ({ options }) => {
           // Hide CustomHeader when inner screen requests tab bar hidden
           if (isInnerStackScreen(route) || options?.tabBarStyle?.display === 'none') {
             return null;
           }
-          return (
-            <CustomHeader
-              onProfilePress={() => navigation.navigate('ProfileTab')}
-            />
-          );
+          return <CustomHeader />;
         },
       })}
     >
-      <Tab.Screen name="HomeTab"     component={HomeStackNavigator}     options={{ title: 'Home' }}     />
+      <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ title: 'Home' }} />
       <Tab.Screen name="BookingsTab" component={BookingsStackNavigator} options={{ title: 'Bookings' }} />
       <Tab.Screen name="EarningsTab" component={EarningsStackNavigator} options={{ title: 'Earnings' }} />
-      <Tab.Screen name="ProfileTab"  component={ProfileStackNavigator}  options={{ title: 'Profile' }}  />
+      <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ title: 'Profile' }} />
     </Tab.Navigator>
   );
 }

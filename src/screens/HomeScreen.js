@@ -4,10 +4,8 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  ImageBackground,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import CustomText from '../components/CustomText';
@@ -41,31 +39,13 @@ const BOOKING_REQUESTS = [
 ];
 
 const QUICK_ACTIONS = [
-  { id: 'BookingsTab', label: 'My Trips',  icon: 'clipboard-list',  lib: 'FontAwesome5',            color: color.GREEN,      bg: color.GREEN_LIGHT },
-  { id: 'EarningsTab', label: 'Earnings',  icon: 'cash-multiple',   lib: 'MaterialCommunityIcons',  color: color.YELLOW_TEXT, bg: color.YELLOW_BG },
-  { id: 'FuelTab',     label: 'Fuel Log',  icon: 'gas-station',     lib: 'MaterialCommunityIcons',  color: '#923357',         bg: '#fce4ec' },
-  { id: 'SupportTab',  label: 'Support',   icon: 'headset',         lib: 'MaterialCommunityIcons',  color: color.TEXT_SUB,    bg: color.AVATAR_BG },
+  { id: 'BookingsTab', label: 'My Trips', icon: 'clipboard-list', lib: 'FontAwesome5', color: color.GREEN, bg: color.GREEN_LIGHT },
+  { id: 'EarningsTab', label: 'Earnings', icon: 'cash-multiple', lib: 'MaterialCommunityIcons', color: color.YELLOW_TEXT, bg: color.YELLOW_BG },
+  { id: 'FuelTab', label: 'Fuel Log', icon: 'gas-station', lib: 'MaterialCommunityIcons', color: '#923357', bg: '#fce4ec' },
+  { id: 'SupportTab', label: 'Support', icon: 'headset', lib: 'MaterialCommunityIcons', color: color.TEXT_SUB, bg: color.AVATAR_BG },
 ];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-
-function OnlineToggle({ isOnline, onToggle }) {
-  return (
-    <TouchableOpacity
-      style={styles.toggleWrapper}
-      onPress={onToggle}
-      activeOpacity={0.85}
-    >
-      <View style={[styles.toggleTrack, isOnline && styles.toggleTrackActive]}>
-        <View style={[styles.toggleThumb, isOnline ? styles.thumbOnline : styles.thumbOffline]}>
-          <CustomText style={[styles.toggleLabel, { color: isOnline ? color.WHITE : color.TEXT_SUB }]}>
-            {isOnline ? 'Online' : 'Offline'}
-          </CustomText>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-}
 
 function ProfileBanner({ onPress }) {
   return (
@@ -193,7 +173,6 @@ function BookingCard({ booking, onAccept, onReject, delay = 0 }) {
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function HomeScreen({ navigation }) {
-  const [isOnline, setIsOnline] = useState(true);
   const [bookings, setBookings] = useState(BOOKING_REQUESTS);
   const [profileComplete] = useState(false);
 
@@ -207,41 +186,34 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.root}>
-      <StatusBar style="dark" />
-
-      {/* Online/Offline toggle — top right */}
-      <View style={styles.topBar}>
-        <View style={{ flex: 1 }} />
-        <OnlineToggle isOnline={isOnline} onToggle={() => setIsOnline((v) => !v)} />
-      </View>
-
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Profile completion banner */}
-        {!profileComplete && (
-          <ProfileBanner onPress={() => navigation.navigate('ProfileTab', { screen: 'PersonalInfo' })} />
-        )}
+        <View style={styles.bgDark}>
+          {/* Profile completion banner */}
+          {!profileComplete && (
+            <ProfileBanner onPress={() => navigation.navigate('ProfileTab', { screen: 'PersonalInfo', initial: false })} />
+          )}
 
-        {/* Stats Row */}
-        <View style={styles.statsRow}>
-          <StatCard
-            title="Today Earnings"
-            value="₹2,450"
-            subtitle="12% vs yesterday"
-            delay={150}
-          />
-          <StatCard
-            title="Trips Completed"
-            value="08"
-            progress={8 / 12}
-            goal={12}
-            delay={200}
-          />
+          {/* Stats Row */}
+          <View style={styles.statsRow}>
+            <StatCard
+              title="Today Earnings"
+              value="₹2,450"
+              subtitle="12% vs yesterday"
+              delay={150}
+            />
+            <StatCard
+              title="Trips Completed"
+              value="08"
+              progress={8 / 12}
+              goal={12}
+              delay={200}
+            />
+          </View>
         </View>
-
         {/* Quick Actions */}
         <Animated.View entering={FadeInDown.delay(250).duration(400)} style={styles.section}>
           <CustomText style={styles.sectionTitle}>Quick Actions</CustomText>
@@ -293,47 +265,6 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: color.SURFACE,
-  },
-
-  // ── Top Bar ──
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 4,
-  },
-  toggleWrapper: {
-    alignItems: 'flex-end',
-  },
-  toggleTrack: {
-    width: 110,
-    height: 36,
-    borderRadius: 99,
-    backgroundColor: color.AVATAR_BG,
-    justifyContent: 'center',
-    padding: 3,
-  },
-  toggleTrackActive: {
-    backgroundColor: color.GREEN_BG,
-  },
-  toggleThumb: {
-    height: 30,
-    borderRadius: 99,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-  },
-  thumbOnline: {
-    backgroundColor: color.GREEN,
-    alignSelf: 'flex-end',
-  },
-  thumbOffline: {
-    backgroundColor: color.WHITE,
-    alignSelf: 'flex-start',
-  },
-  toggleLabel: {
-    ...globalStyles.f12Bold,
   },
 
   // ── Scroll ──
@@ -394,6 +325,16 @@ const styles = StyleSheet.create({
   profileBannerBtnText: {
     ...globalStyles.f12Bold,
     color: color.WHITE,
+  },
+  bgDark: {
+    backgroundColor: color.GREEN_DARK,
+    gap: 16,
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+    paddingTop: 6,
+    paddingBottom: 22,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
 
   // ── Stats ──

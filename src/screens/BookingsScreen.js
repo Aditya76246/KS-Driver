@@ -251,7 +251,6 @@ export default function BookingsScreen({ navigation }) {
 
   return (
     <View style={styles.root}>
-      <StatusBar style="dark" />
 
       {/* ── Status Tabs ── */}
       <View style={styles.tabsWrapper}>

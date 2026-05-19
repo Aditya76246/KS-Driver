@@ -245,8 +245,8 @@ const styles = StyleSheet.create({
   bottomContainer: {
     backgroundColor: '#ffffffee',
     paddingHorizontal: 24,
-    paddingTop: 28,
-    paddingBottom: 40,
+    paddingTop: 20,
+    paddingBottom: 20,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
   },
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 30,
     justifyContent: 'center',
-    marginTop: 24,
+    marginTop: 20,
   },
 
   primaryText: {
@@ -328,11 +328,11 @@ const styles = StyleSheet.create({
     width: 45,
     height: 55,
     borderRadius: 10,
-    backgroundColor: '#e7e7e7',
+    backgroundColor: color.SURFACE,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: isActive ? 2 : 0,
-    borderColor: '#2e7d32',
+    borderWidth: isActive ? 1 : 0,
+    borderColor: color.BORDER_GREEN,
   }),
 
   hiddenInput: {
