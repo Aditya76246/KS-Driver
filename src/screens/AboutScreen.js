@@ -65,7 +65,7 @@ const LINKS = [
   {
     icon: 'globe-outline',
     label: 'Visit our Website',
-    url: 'https://kisansahakar.in',
+    url: 'https://kisansahakar.com',
   },
   {
     icon: 'logo-facebook',
@@ -76,6 +76,11 @@ const LINKS = [
     icon: 'logo-instagram',
     label: 'Follow us on Instagram',
     url: 'https://instagram.com/kisansahakar',
+  },
+  {
+    icon: 'logo-youtube',
+    label: 'Follow us on YouTube',
+    url: 'https://youtube.com/kisansahakar',
   },
   {
     icon: 'mail-outline',

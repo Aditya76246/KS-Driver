@@ -1,9 +1,10 @@
-import { View, Text } from "react-native";
+import { View } from "react-native";
+import CustomText from "../components/CustomText";
 
 export default function RegisterScreen() {
   return (
     <View>
-      <Text>Register Screen</Text>
+      <CustomText>Register Screen</CustomText>
     </View>
   );
 }

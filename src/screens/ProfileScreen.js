@@ -25,6 +25,7 @@ const COMPLETION_STEPS = [
 const ACCOUNT_MENU = [
   { id: 'PersonalInfo', label: 'Personal Information', sub: 'View and update your personal details', icon: 'person-outline' },
   { id: 'Documents', label: 'My Documents', sub: 'Manage your uploaded documents', icon: 'document-text-outline' },
+  { id: 'ChooseLanguage', label: 'App Language', sub: 'Change your preferred app language', icon: 'language-outline', params: { goBackOnContinue: true } },
 ];
 
 const SUPPORT_MENU = [
@@ -59,7 +60,7 @@ function MenuItem({ item, onPress, isLast }) {
   return (
     <TouchableOpacity
       style={[styles.menuItem, !isLast && styles.menuItemBorder]}
-      onPress={() => onPress(item.id)}
+      onPress={() => onPress(item)}
       activeOpacity={0.7}
     >
       <View style={styles.menuIconBox}>
@@ -81,6 +82,10 @@ export default function ProfileScreen({ navigation }) {
 
   const handleMenuPress = (id) => {
     navigation.navigate(id);
+  };
+
+  const handleMenuItemPress = (item) => {
+    navigation.navigate(item.id, item.params);
   };
 
   const handleLogout = () => {
@@ -172,7 +177,7 @@ export default function ProfileScreen({ navigation }) {
               <MenuItem
                 key={item.id}
                 item={item}
-                onPress={handleMenuPress}
+                onPress={handleMenuItemPress}
                 isLast={i === ACCOUNT_MENU.length - 1}
               />
             ))}
@@ -187,7 +192,7 @@ export default function ProfileScreen({ navigation }) {
               <MenuItem
                 key={item.id}
                 item={item}
-                onPress={handleMenuPress}
+                onPress={handleMenuItemPress}
                 isLast={i === SUPPORT_MENU.length - 1}
               />
             ))}

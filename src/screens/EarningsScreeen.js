@@ -1,9 +1,10 @@
-import { View, Text } from "react-native";
+import { View } from "react-native";
+import CustomText from "../components/CustomText";
 
 export default function EarningsScreen() {
   return (
     <View>
-      <Text>Earnings Screen</Text>
+      <CustomText>Earnings Screen</CustomText>
     </View>
   );
 }

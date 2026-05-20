@@ -8,6 +8,7 @@ import TermsScreen from '../screens/TermsScreen';
 import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import HelpSupportScreen from '../screens/HelpSupportScreen';
 import AboutScreen from '../screens/AboutScreen';
+import ChooseLanguage from '../components/ChooseLanguage';
 
 const Stack = createStackNavigator();
 
@@ -33,6 +34,12 @@ export default function ProfileStackNavigator() {
       <Stack.Screen
         name="Documents"
         component={DocumentsScreen}
+        options={{ tabBarStyle: { display: 'none' } }}
+      />
+
+      <Stack.Screen
+        name="ChooseLanguage"
+        component={ChooseLanguage}
         options={{ tabBarStyle: { display: 'none' } }}
       />
 

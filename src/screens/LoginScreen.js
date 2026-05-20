@@ -21,6 +21,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import SplashScreenBg from '../../assets/images/loginBg.png';
 import globalStyles from '../styles/globalStyles';
@@ -29,6 +30,9 @@ import { color } from '../styles/theme';
 
 export default function LoginScreen() {
   const navigation = useNavigation();
+  const { i18n } = useTranslation();
+  const textMap = i18n.getResourceBundle(i18n.language)?.text || {};
+  const tx = (value) => textMap[value] || value;
   const [showOtp, setShowOtp] = useState(false);
   const [mobile, setMobile] = useState('');
   const [otp, setOtp] = useState('');
@@ -166,7 +170,7 @@ export default function LoginScreen() {
                 <CustomText style={styles.prefix}>+91</CustomText>
 
                 <TextInput
-                  placeholder="Enter mobile number"
+                  placeholder={tx("Enter mobile number")}
                   style={styles.input}
                   keyboardType="number-pad"
                   value={mobile}
@@ -204,7 +208,7 @@ export default function LoginScreen() {
                           { color: canResend ? color.GREEN : '#ccc' },
                         ]}
                       >
-                        {canResend ? 'Resend' : `Resend in ${timer}s`}
+                        {canResend ? 'Resend' : `${tx("Resend in")} ${timer}s`}
                       </CustomText>
                     </TouchableOpacity>
                   </View>
