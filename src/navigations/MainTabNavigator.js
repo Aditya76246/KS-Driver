@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import CustomHeader from '../components/CustomHeader';
 import CustomText from '../components/CustomText';
+import NotificationSheet from '../components/NotificationSheet';
 import globalStyles from '../styles/globalStyles';
 
 import HomeStackNavigator from './HomeStackNavigator';
@@ -36,15 +37,83 @@ const TAB_ROOT_ROUTES = {
   ProfileTab: 'ProfileMain',
 };
 
+// ─── Seed notification data ───────────────────────────────────────────────────
+// In production, fetch this from your API / push notification handler.
+const SEED_NOTIFICATIONS = [
+  {
+    id: 'n1',
+    type: 'booking_request',
+    title: 'New booking request',
+    body: 'Rajesh Kumar — Tractor Ploughing, 3.5 Acres · Nellore',
+    time: '2m ago',
+    read: false,
+    booking: {
+      id: 'KA-8821',
+      farmerName: 'Rajesh Kumar',
+      service: 'Tractor Ploughing',
+      area: '3.5 Acres',
+      location: 'Nellore Sub-div',
+      distance: '4.2 km away',
+      date: 'Today, 4:30 PM',
+      price: '₹2,450',
+      description: 'Farmer requests deep ploughing for 3.5 acres of cotton field near the irrigation canal.',
+      status: 'new',
+    },
+  },
+  {
+    id: 'n2',
+    type: 'booking_request',
+    title: 'New booking request',
+    body: 'Venkata Subbaiah — Harvester Rental, 5 Acres · Ongole',
+    time: '18m ago',
+    read: false,
+    booking: {
+      id: 'KA-9023',
+      farmerName: 'Venkata Subbaiah',
+      service: 'Harvester Rental',
+      area: '5 Acres',
+      location: 'Ongole Mandal',
+      distance: '12.5 km away',
+      date: 'Oct 24, 08:00 AM',
+      price: '₹8,000',
+      description: 'Farmer requests harvesting for 5 acres of paddy field near the main canal road.',
+      status: 'new',
+    },
+  },
+  {
+    id: 'n3',
+    type: 'payment',
+    title: 'Payment received',
+    body: '₹3,200 credited for KA-8750 · Suresh Reddy',
+    time: '2h ago',
+    read: true,
+  },
+  {
+    id: 'n4',
+    type: 'alert',
+    title: 'KYC document expiring',
+    body: 'Your driving license expires in 12 days. Update now.',
+    time: 'Yesterday',
+    read: true,
+  },
+  {
+    id: 'n5',
+    type: 'system',
+    title: 'Profile incomplete',
+    body: 'Complete your bank details to start receiving payments.',
+    time: '2 days ago',
+    read: true,
+  },
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 function isInnerStackScreen(route) {
   const rootRouteName = TAB_ROOT_ROUTES[route.name];
   const focusedRouteName = getFocusedRouteNameFromRoute(route);
-
   return Boolean(focusedRouteName && focusedRouteName !== rootRouteName);
 }
 
 // ─── Animated Tab Button ──────────────────────────────────────────────────────
-
 function TabButton({ tab, isFocused, onPress, onLongPress }) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const bgAnim = useRef(new Animated.Value(0)).current;
@@ -102,7 +171,6 @@ function TabButton({ tab, isFocused, onPress, onLongPress }) {
 }
 
 // ─── Custom Tab Bar ───────────────────────────────────────────────────────────
-
 function CustomTabBar({ state, descriptors, navigation }) {
   const insets = useSafeAreaInsets();
 
@@ -110,7 +178,6 @@ function CustomTabBar({ state, descriptors, navigation }) {
   const focusedDescriptor = descriptors[focusedRoute.key];
   const tabBarStyle = focusedDescriptor?.options?.tabBarStyle;
 
-  // Inner screens signal { display: 'none' } — honour it.
   if (isInnerStackScreen(focusedRoute) || tabBarStyle?.display === 'none') {
     return null;
   }
@@ -132,19 +199,14 @@ function CustomTabBar({ state, descriptors, navigation }) {
             });
             if (!event.defaultPrevented) {
               if (isFocused) {
-                // Already on this tab — pop back to root screen of its stack
-                navigation.navigate(route.name, {
-                  screen: TAB_ROOT_ROUTES[route.name],
-                });
+                navigation.navigate(route.name, { screen: TAB_ROOT_ROUTES[route.name] });
               } else {
                 navigation.navigate(route.name);
               }
             }
           };
 
-          const onLongPress = () => {
-            navigation.emit({ type: 'tabLongPress', target: route.key });
-          };
+          const onLongPress = () => navigation.emit({ type: 'tabLongPress', target: route.key });
 
           return (
             <TabButton
@@ -162,31 +224,57 @@ function CustomTabBar({ state, descriptors, navigation }) {
 }
 
 // ─── Main Navigator ───────────────────────────────────────────────────────────
-
 export default function MainTabNavigator() {
+  // Notification state lives here so the header badge and sheet stay in sync.
+  const [notifications, setNotifications] = useState(SEED_NOTIFICATIONS);
+  const [sheetVisible, setSheetVisible] = useState(false);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  // Exposed to NotificationSheet so it can mutate the shared list
+  const handleNotificationsChange = useCallback((updater) => {
+    setNotifications(updater);
+  }, []);
+
   return (
-    <Tab.Navigator
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={({ route }) => ({
-        header: ({ options }) => {
-          // Hide CustomHeader when inner screen requests tab bar hidden
-          if (isInnerStackScreen(route) || options?.tabBarStyle?.display === 'none') {
-            return null;
-          }
-          return <CustomHeader />;
-        },
-      })}
-    >
-      <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ title: 'Home' }} />
-      <Tab.Screen name="BookingsTab" component={BookingsStackNavigator} options={{ title: 'Bookings' }} />
-      <Tab.Screen name="EarningsTab" component={EarningsStackNavigator} options={{ title: 'Earnings' }} />
-      <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ title: 'Profile' }} />
-    </Tab.Navigator>
+    <>
+      <Tab.Navigator
+        tabBar={(props) => <CustomTabBar {...props} />}
+        screenOptions={({ route }) => ({
+          header: ({ navigation, options }) => {
+            if (isInnerStackScreen(route) || options?.tabBarStyle?.display === 'none') {
+              return null;
+            }
+            return (
+              <CustomHeader
+                unreadCount={unreadCount}
+                onNotificationPress={() => setSheetVisible(true)}
+              />
+            );
+          },
+        })}
+      >
+        <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ title: 'Home' }} />
+        <Tab.Screen name="BookingsTab" component={BookingsStackNavigator} options={{ title: 'Bookings' }} />
+        <Tab.Screen name="EarningsTab" component={EarningsStackNavigator} options={{ title: 'Earnings' }} />
+        <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ title: 'Profile' }} />
+      </Tab.Navigator>
+
+      {/*
+        NotificationSheet is rendered outside the navigator so it overlays
+        the entire screen (tab bar + header) without z-index fighting.
+      */}
+      <NotificationSheet
+        visible={sheetVisible}
+        onClose={() => setSheetVisible(false)}
+        notifications={notifications}
+        onNotificationsChange={handleNotificationsChange}
+      />
+    </>
   );
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   tabBarWrapper: {
     backgroundColor: '#ffffff',

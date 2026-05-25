@@ -75,15 +75,26 @@ function StatusToggle({ isOnline, onToggle }) {
 
 // ─── Main Header ──────────────────────────────────────────────────────────────
 export default function CustomHeader({
-  userName = 'Sourav',
   subtitle = 'Welcome to',
   brandName = 'KisanSahakar',
   location = 'Hyderabad, Telangana',
-  notificationCount = 2,
-  onNotificationPress,
+  unreadCount = 0,          // controlled by MainTabNavigator
+  onNotificationPress,      // opens the sheet — wired in MainTabNavigator
   onLocationPress,
 }) {
   const [isOnline, setIsOnline] = useState(true);
+
+  // Badge pulses when a new notification arrives
+  const badgeScale = useRef(new Animated.Value(1)).current;
+
+  const prevCount = useRef(unreadCount);
+  if (prevCount.current !== unreadCount && unreadCount > prevCount.current) {
+    prevCount.current = unreadCount;
+    Animated.sequence([
+      Animated.spring(badgeScale, { toValue: 1.5, useNativeDriver: true, tension: 200, friction: 4 }),
+      Animated.spring(badgeScale, { toValue: 1,   useNativeDriver: true, tension: 200, friction: 6 }),
+    ]).start();
+  }
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
@@ -94,7 +105,7 @@ export default function CustomHeader({
         {/* Left — copy stack */}
         <View style={styles.copy}>
 
-          {/* Location row with chevron */}
+          {/* Location row */}
           <Pressable
             onPress={onLocationPress}
             style={styles.locationRow}
@@ -117,27 +128,29 @@ export default function CustomHeader({
 
         {/* Right — actions */}
         <View style={styles.actions}>
+
           {/* Notification bell */}
           <Pressable
             onPress={onNotificationPress}
             style={styles.bellButton}
             android_ripple={{ color: 'rgba(255,255,255,0.15)', borderless: true, radius: 22 }}
-            accessibilityLabel="Notifications"
+            accessibilityLabel={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
           >
             <Ionicons name="notifications" size={20} color="#fff" />
-            {notificationCount > 0 && (
-              <View style={styles.badge}>
+
+            {unreadCount > 0 && (
+              <Animated.View style={[styles.badge, { transform: [{ scale: badgeScale }] }]}>
                 <CustomText style={styles.badgeText}>
-                  {notificationCount > 9 ? '9+' : notificationCount}
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </CustomText>
-              </View>
+              </Animated.View>
             )}
           </Pressable>
 
           {/* Divider */}
           <View style={styles.divider} />
 
-          {/* Status toggle */}
+          {/* Online / Away toggle */}
           <StatusToggle isOnline={isOnline} onToggle={() => setIsOnline(v => !v)} />
         </View>
       </View>
@@ -165,29 +178,27 @@ const styles = StyleSheet.create({
     gap: 10,
   },
 
-  // ── Copy (left stack) ──
+  // ── Copy (left) ──
   copy: {
     flex: 1,
     gap: 3,
   },
 
-  // ── Location row ──
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    alignSelf: 'flex-start',    // shrink-wrap width to content
+    alignSelf: 'flex-start',
   },
 
   locationText: {
     color: '#fff',
-   ...globalStyles.f10Bold,
+    ...globalStyles.f10Bold,
     letterSpacing: 0.2,
-    flexShrink: 1,              // allows text to truncate with ellipsis
-    maxWidth: 160,              // hard cap before chevron gets squeezed
+    flexShrink: 1,
+    maxWidth: 160,
   },
 
-  // ── Welcome row ──
   subtitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -204,7 +215,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
 
-  // ── Actions ──
+  // ── Actions (right) ──
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -301,7 +312,6 @@ const styles = StyleSheet.create({
     backgroundColor: color.ORANGE,
   },
 
-  // ── Bottom accent ──
   accentLine: {
     height: 2,
     marginHorizontal: 16,
