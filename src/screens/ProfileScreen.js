@@ -30,6 +30,7 @@ const ACCOUNT_MENU = [
 
 const SUPPORT_MENU = [
   { id: 'help', label: 'Help & Support', sub: 'Get help, chat or call us', icon: 'headset-outline' },
+  { id: 'SpeechCommandDemo', label: 'Speech Command Demo', sub: 'Load sample lists from voice commands', icon: 'mic-outline' },
   { id: 'about', label: 'About Kisan Sahakar', sub: 'Know more about the app', icon: 'information-circle-outline' },
   { id: 'terms', label: 'Terms & Conditions', sub: 'Read our terms and conditions', icon: 'reader-outline' },
   { id: 'privacy', label: 'Privacy Policy', sub: 'Read our privacy policy', icon: 'lock-closed-outline' },

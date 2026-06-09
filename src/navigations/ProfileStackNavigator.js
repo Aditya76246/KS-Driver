@@ -8,6 +8,7 @@ import TermsScreen from '../screens/TermsScreen';
 import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import HelpSupportScreen from '../screens/HelpSupportScreen';
 import AboutScreen from '../screens/AboutScreen';
+import SpeechCommandDemoScreen from '../screens/SpeechCommandDemoScreen';
 import ChooseLanguage from '../components/ChooseLanguage';
 
 const Stack = createStackNavigator();
@@ -58,6 +59,12 @@ export default function ProfileStackNavigator() {
       <Stack.Screen
         name="help"
         component={HelpSupportScreen}
+        options={{ tabBarStyle: { display: 'none' } }}
+      />
+
+      <Stack.Screen
+        name="SpeechCommandDemo"
+        component={SpeechCommandDemoScreen}
         options={{ tabBarStyle: { display: 'none' } }}
       />
 

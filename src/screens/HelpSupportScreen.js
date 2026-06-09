@@ -14,10 +14,11 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import CustomText from '../components/CustomText';
 import InnerScreenHeader from '../components/InnerScreenHeader';
+import VoiceInputButton from '../components/VoiceInputButton'; 
 import globalStyles from '../styles/globalStyles';
 import { color } from '../styles/theme';
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+// ─── Data (unchanged) ─────────────────────────────────────────────────────────
 
 const CONTACT_OPTIONS = [
   {
@@ -72,32 +73,31 @@ const FAQS = [
   {
     id: '4',
     q: 'How do I complete my KYC verification?',
-    a: 'Go to Profile → Personal Information and follow the 3-step profile completion wizard. You will need to provide basic details, farm details, and upload documents including Aadhaar and bank account information.',
+    a: 'Go to Profile → Personal Information and follow the 3-step profile completion wizard.',
   },
   {
     id: '5',
     q: 'Can I cancel an accepted booking?',
-    a: 'Yes, you can cancel a booking up to 2 hours before the scheduled time without penalty. Open the booking in the Bookings tab → View Details → Cancel Job. Repeated cancellations may affect your account standing.',
+    a: 'Yes, you can cancel a booking up to 2 hours before the scheduled time without penalty.',
   },
   {
     id: '6',
     q: 'What if the farmer is not present at the location?',
-    a: 'If the farmer is not reachable or present, tap "Report Issue" on the booking detail screen. Our support team will contact both parties within 30 minutes to resolve the situation.',
+    a: 'If the farmer is not reachable or present, tap "Report Issue" on the booking detail screen.',
   },
   {
     id: '7',
     q: 'How do I switch the app language to Telugu?',
-    a: 'On the Home screen, tap the language toggle at the top to switch between English and Telugu. You can switch back at any time without losing any data.',
+    a: 'On the Home screen, tap the language toggle at the top to switch between English and Telugu.',
   },
   {
     id: '8',
     q: 'What equipment types are supported on the platform?',
-    a: 'Currently supported equipment includes Tractor (ploughing, tilling), Harvester Rental, Rotavator, Seeder Machine, and Sprayer. More equipment types will be added in future updates.',
+    a: 'Currently supported: Tractor, Harvester Rental, Rotavator, Seeder Machine, and Sprayer.',
   },
 ];
 
-// ─── FAQ Item ─────────────────────────────────────────────────────────────────
-
+// ─── FAQ Item (unchanged) ─────────────────────────────────────────────────────
 function FaqItem({ item, index }) {
   const [open, setOpen] = useState(false);
   return (
@@ -131,8 +131,7 @@ function FaqItem({ item, index }) {
   );
 }
 
-// ─── Contact Card ─────────────────────────────────────────────────────────────
-
+// ─── Contact Card (unchanged) ─────────────────────────────────────────────────
 function ContactCard({ option, delay }) {
   return (
     <Animated.View entering={FadeInDown.delay(delay).duration(400)}>
@@ -167,10 +166,9 @@ function ContactCard({ option, delay }) {
 }
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
-
 export default function HelpSupportScreen({ navigation }) {
-  const [query, setQuery] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [query,      setQuery]      = useState('');
+  const [ticketText, setTicketText] = useState('');   // ← now controlled
 
   const filteredFaqs = FAQS.filter(
     (f) =>
@@ -183,7 +181,7 @@ export default function HelpSupportScreen({ navigation }) {
     Alert.alert(
       'Support Request Sent',
       'Our team will get back to you within 24 hours on your registered mobile number.',
-      [{ text: 'OK', onPress: () => setSubmitted(false) }]
+      [{ text: 'OK', onPress: () => setTicketText('') }]
     );
   };
 
@@ -210,7 +208,7 @@ export default function HelpSupportScreen({ navigation }) {
           </View>
         </Animated.View>
 
-        {/* ── Search FAQs ── */}
+        {/* ── Search FAQs — now with mic button ── */}
         <Animated.View entering={FadeInDown.delay(80).duration(400)} style={styles.searchBox}>
           <Ionicons name="search-outline" size={18} color={color.TEXT_MUTED} />
           <TextInput
@@ -220,10 +218,17 @@ export default function HelpSupportScreen({ navigation }) {
             value={query}
             onChangeText={setQuery}
           />
-          {query.length > 0 && (
+          {query.length > 0 ? (
             <TouchableOpacity onPress={() => setQuery('')} activeOpacity={0.7}>
               <Ionicons name="close-circle" size={18} color={color.TEXT_MUTED} />
             </TouchableOpacity>
+          ) : (
+            /* Mic replaces the clear button when field is empty */
+            <VoiceInputButton
+              size="sm"
+              onResult={(text) => setQuery(text)}
+              onPartialResult={(text) => setQuery(text)}
+            />
           )}
         </Animated.View>
 
@@ -241,7 +246,9 @@ export default function HelpSupportScreen({ navigation }) {
           <CustomText style={styles.sectionLabel}>
             Frequently Asked Questions
             {query.trim() !== '' && (
-              <CustomText style={styles.faqCount}>  {filteredFaqs.length} result{filteredFaqs.length !== 1 ? 's' : ''}</CustomText>
+              <CustomText style={styles.faqCount}>
+                {'  '}{filteredFaqs.length} result{filteredFaqs.length !== 1 ? 's' : ''}
+              </CustomText>
             )}
           </CustomText>
         </Animated.View>
@@ -260,7 +267,7 @@ export default function HelpSupportScreen({ navigation }) {
           </Animated.View>
         )}
 
-        {/* ── Raise a Ticket ── */}
+        {/* ── Raise a Ticket — now with voice ── */}
         <Animated.View entering={FadeInDown.delay(300).duration(400)}>
           <CustomText style={styles.sectionLabel}>Still need help?</CustomText>
         </Animated.View>
@@ -270,19 +277,35 @@ export default function HelpSupportScreen({ navigation }) {
           <CustomText style={styles.ticketSub}>
             Describe your issue and our team will respond to your registered mobile within 24 hours.
           </CustomText>
-          <TextInput
-            style={styles.ticketInput}
-            placeholder="Describe your issue here..."
-            placeholderTextColor={color.TEXT_MUTED}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-            value={submitted ? '' : undefined}
-          />
+
+          {/* Ticket text area + mic button row */}
+          <View style={styles.ticketInputWrapper}>
+            <TextInput
+              style={styles.ticketInput}
+              placeholder="Describe your issue here..."
+              placeholderTextColor={color.TEXT_MUTED}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+              value={ticketText}
+              onChangeText={setTicketText}
+            />
+            {/* Floating mic in bottom-right corner of the textarea */}
+            <View style={styles.ticketMicWrapper}>
+              <VoiceInputButton
+                size="md"
+                onResult={(text) => setTicketText((prev) => prev ? prev + ' ' + text : text)}
+                onPartialResult={(text) => {
+                  // Show partial appended to existing text without replacing it
+                }}
+              />
+            </View>
+          </View>
+
           <TouchableOpacity
-            style={styles.ticketBtn}
+            style={[styles.ticketBtn, !ticketText.trim() && styles.ticketBtnDisabled]}
             onPress={handleSubmitTicket}
-            activeOpacity={0.8}
+            activeOpacity={ticketText.trim() ? 0.8 : 1}
           >
             <Ionicons name="send-outline" size={16} color={color.WHITE} />
             <CustomText style={styles.ticketBtnText}>Submit Request</CustomText>
@@ -296,7 +319,6 @@ export default function HelpSupportScreen({ navigation }) {
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   root: {
     flex: 1,
@@ -308,7 +330,6 @@ const styles = StyleSheet.create({
     gap: 14,
   },
 
-  // ── Hero Banner ──
   heroBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -342,7 +363,7 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
 
-  // ── Search ──
+  // ── Search box — mic replaces clear icon ──
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -352,16 +373,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.BORDER_LIGHT,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 8,       // reduced from 12 to keep height consistent with mic button
   },
   searchInput: {
     flex: 1,
     ...globalStyles.f12Regular,
     color: color.TEXT_MAIN,
     padding: 0,
+    paddingVertical: 4,
   },
 
-  // ── Section Label ──
   sectionLabel: {
     ...globalStyles.f14Bold,
     color: color.TEXT_MUTED,
@@ -373,7 +394,6 @@ const styles = StyleSheet.create({
     color: color.GREEN,
   },
 
-  // ── Contact Card ──
   contactCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -397,43 +417,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  contactInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  contactLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  contactLabel: {
-    ...globalStyles.f14Bold,
-    color: color.TEXT_MAIN,
-  },
-  contactBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 30,
-  },
-  contactBadgeText: {
-    ...globalStyles.f10Bold,
-  },
-  contactValue: {
-    ...globalStyles.f12Bold,
-    color: color.GREEN,
-  },
-  contactSub: {
-    ...globalStyles.f10Regular,
-    color: color.TEXT_MUTED,
-  },
-  contactArrow: {
-    padding: 4,
-  },
+  contactInfo:     { flex: 1, gap: 2 },
+  contactLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  contactLabel:    { ...globalStyles.f14Bold,    color: color.TEXT_MAIN },
+  contactBadge:    { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 30 },
+  contactBadgeText:{ ...globalStyles.f10Bold },
+  contactValue:    { ...globalStyles.f12Bold,    color: color.GREEN },
+  contactSub:      { ...globalStyles.f10Regular, color: color.TEXT_MUTED },
+  contactArrow:    { padding: 4 },
 
-  // ── FAQ ──
-  faqList: {
-    gap: 8,
-  },
+  faqList: { gap: 8 },
   faqItem: {
     backgroundColor: color.WHITE,
     borderRadius: 14,
@@ -454,56 +447,25 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   faqIconBox: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
+    width: 28, height: 28, borderRadius: 8,
     backgroundColor: color.GREEN_BG,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center', alignItems: 'center',
     flexShrink: 0,
   },
-  faqNumber: {
-    ...globalStyles.f10Bold,
-    color: color.GREEN,
-  },
-  faqQ: {
-    ...globalStyles.f12Bold,
-    color: color.TEXT_MAIN,
-    flex: 1,
-  },
-  faqQOpen: {
-    color: color.GREEN,
-  },
+  faqNumber:  { ...globalStyles.f10Bold,    color: color.GREEN      },
+  faqQ:       { ...globalStyles.f12Bold,    color: color.TEXT_MAIN, flex: 1 },
+  faqQOpen:   { color: color.GREEN },
   faqBody: {
-    paddingHorizontal: 14,
-    paddingBottom: 14,
-    borderTopWidth: 1,
-    borderTopColor: color.BORDER_LIGHT,
-    paddingTop: 12,
+    paddingHorizontal: 14, paddingBottom: 14,
+    borderTopWidth: 1, borderTopColor: color.BORDER_LIGHT, paddingTop: 12,
   },
-  faqA: {
-    ...globalStyles.f12Regular,
-    color: color.TEXT_SUB,
-    lineHeight: 20,
-  },
+  faqA: { ...globalStyles.f12Regular, color: color.TEXT_SUB, lineHeight: 20 },
 
-  // ── No Results ──
-  noResults: {
-    alignItems: 'center',
-    paddingVertical: 40,
-    gap: 8,
-  },
-  noResultsText: {
-    ...globalStyles.f14Bold,
-    color: color.TEXT_MUTED,
-  },
-  noResultsSub: {
-    ...globalStyles.f12Regular,
-    color: color.TEXT_MUTED,
-    textAlign: 'center',
-  },
+  noResults: { alignItems: 'center', paddingVertical: 40, gap: 8 },
+  noResultsText: { ...globalStyles.f14Bold,    color: color.TEXT_MUTED },
+  noResultsSub:  { ...globalStyles.f12Regular, color: color.TEXT_MUTED, textAlign: 'center' },
 
-  // ── Ticket ──
+  // ── Ticket card ──
   ticketCard: {
     backgroundColor: color.WHITE,
     borderRadius: 18,
@@ -517,26 +479,29 @@ const styles = StyleSheet.create({
     elevation: 2,
     gap: 12,
   },
-  ticketTitle: {
-    ...globalStyles.f14Bold,
-    color: color.TEXT_MAIN,
-  },
-  ticketSub: {
-    ...globalStyles.f12Regular,
-    color: color.TEXT_MUTED,
-    lineHeight: 18,
-    marginTop: -4,
+  ticketTitle: { ...globalStyles.f14Bold,    color: color.TEXT_MAIN },
+  ticketSub:   { ...globalStyles.f12Regular, color: color.TEXT_MUTED, lineHeight: 18, marginTop: -4 },
+
+  ticketInputWrapper: {
+    position: 'relative',
   },
   ticketInput: {
     backgroundColor: color.SURFACE_LOW,
     borderRadius: 12,
     padding: 14,
+    paddingBottom: 52,         // extra space so text doesn't go under the mic
     ...globalStyles.f12Regular,
     color: color.TEXT_MAIN,
-    minHeight: 100,
+    minHeight: 110,
     borderWidth: 1,
     borderColor: color.BORDER_LIGHT,
   },
+  ticketMicWrapper: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+  },
+
   ticketBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -546,8 +511,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 14,
   },
-  ticketBtnText: {
-    ...globalStyles.f14Bold,
-    color: color.WHITE,
+  ticketBtnDisabled: {
+    backgroundColor: color.AVATAR_BG,
   },
+  ticketBtnText: { ...globalStyles.f14Bold, color: color.WHITE },
 });

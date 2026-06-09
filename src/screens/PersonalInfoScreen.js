@@ -16,6 +16,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import CustomText from '../components/CustomText';
 import InnerScreenHeader from '../components/InnerScreenHeader';
+import VoiceTextInput from '../components/VoiceTextInput';   // ← NEW
 import globalStyles from '../styles/globalStyles';
 import { color } from '../styles/theme';
 
@@ -33,13 +34,13 @@ const BANK_OPTIONS       = [
 ];
 
 const STEP_META = [
-  { label: 'Personal', icon: 'person-outline'     },
-  { label: 'Driving',  icon: 'car-outline'         },
-  { label: 'Bank',     icon: 'business-outline'    },
+  { label: 'Personal', icon: 'person-outline'  },
+  { label: 'Driving',  icon: 'car-outline'      },
+  { label: 'Bank',     icon: 'business-outline' },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// Shared Sub-components
+// Shared Sub-components (unchanged except InputField → VoiceTextInput)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function StepIndicator({ current }) {
@@ -92,31 +93,7 @@ function AvatarUpload({ uri, onPress }) {
   );
 }
 
-function InputField({ label, value, onChangeText, placeholder, icon, keyboardType = 'default', hint }) {
-  const [focused, setFocused] = useState(false);
-  return (
-    <View style={styles.fieldGroup}>
-      {label ? <CustomText style={styles.fieldLabel}>{label}</CustomText> : null}
-      <View style={[styles.inputBox, focused && styles.inputBoxFocused]}>
-        {icon && (
-          <Ionicons name={icon} size={18} color={focused ? color.GREEN : color.TEXT_MUTED} style={styles.inputIcon} />
-        )}
-        <TextInput
-          style={styles.input}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={color.TEXT_MUTED}
-          keyboardType={keyboardType}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-        />
-      </View>
-      {hint ? <CustomText style={styles.fieldHint}>{hint}</CustomText> : null}
-    </View>
-  );
-}
-
+// ─── Dropdown (unchanged) ─────────────────────────────────────────────────────
 function Dropdown({ label, value, onSelect, options, placeholder, sheetTitle, iconNode, hint }) {
   const [open, setOpen] = useState(false);
   return (
@@ -199,7 +176,6 @@ function InfoBanner({ text }) {
   );
 }
 
-// ─── Section Header inside a card ────────────────────────────────────────────
 function CardSection({ title, iconName }) {
   return (
     <View style={styles.cardSectionHeader}>
@@ -227,7 +203,8 @@ function Step1({ data, onChange }) {
       <AvatarUpload uri={data.photoUri} onPress={() => {}} />
 
       <View style={styles.formCard}>
-        <InputField
+        {/* ── Full Name — voice enabled ── */}
+        <VoiceTextInput
           label="Full Name"
           value={data.fullName}
           onChangeText={(v) => onChange('fullName', v)}
@@ -248,7 +225,8 @@ function Step1({ data, onChange }) {
             />
           </View>
           <View style={styles.rowFieldHalf}>
-            <InputField
+            {/* Age — voice enabled (farmer can say "28") */}
+            <VoiceTextInput
               label="Age"
               value={data.age}
               onChangeText={(v) => onChange('age', v)}
@@ -259,21 +237,25 @@ function Step1({ data, onChange }) {
           </View>
         </View>
 
-        <InputField
+        {/* Mobile — voice disabled (numbers are error-prone via voice) */}
+        <VoiceTextInput
           label="Mobile Number"
           value={data.mobile}
           onChangeText={(v) => onChange('mobile', v)}
           placeholder="+91 XXXXX XXXXX"
           icon="call-outline"
           keyboardType="phone-pad"
+          voiceEnabled={false}
         />
 
-        <InputField
+        {/* Address — voice very useful here */}
+        <VoiceTextInput
           label="Address (Village / District)"
           value={data.address}
           onChangeText={(v) => onChange('address', v)}
-          placeholder="e.g. Mapusa, North Goa"
+          placeholder="e.g. Kandukur, Nellore"
           icon="location-outline"
+          hint="Speak your village and district name"
         />
       </View>
     </Animated.View>
@@ -298,17 +280,16 @@ function Step2({ data, onChange }) {
         </CustomText>
       </View>
 
-      {/* License card */}
       <View style={styles.formCard}>
         <CardSection title="License Information" iconName="ribbon-outline" />
 
-        <InputField
+        <VoiceTextInput
           label="Driving License Number"
           value={data.licenseNumber}
           onChangeText={(v) => onChange('licenseNumber', v.toUpperCase())}
-          placeholder="e.g. MH1234567890123"
+          placeholder="e.g. AP1234567890123"
           icon="card-outline"
-          hint="Enter as printed on your license"
+          hint="Speak or type your license number"
         />
 
         <Dropdown
@@ -323,23 +304,25 @@ function Step2({ data, onChange }) {
 
         <View style={styles.rowFields}>
           <View style={styles.rowFieldHalf}>
-            <InputField
+            <VoiceTextInput
               label="Issue Date"
               value={data.licenseIssueDate}
               onChangeText={(v) => onChange('licenseIssueDate', v)}
               placeholder="DD/MM/YYYY"
               icon="calendar-outline"
               keyboardType="numbers-and-punctuation"
+              voiceEnabled={false}
             />
           </View>
           <View style={styles.rowFieldHalf}>
-            <InputField
+            <VoiceTextInput
               label="Expiry Date"
               value={data.licenseExpiry}
               onChangeText={(v) => onChange('licenseExpiry', v)}
               placeholder="DD/MM/YYYY"
               icon="calendar-outline"
               keyboardType="numbers-and-punctuation"
+              voiceEnabled={false}
             />
           </View>
         </View>
@@ -355,7 +338,6 @@ function Step2({ data, onChange }) {
         />
       </View>
 
-      {/* Vehicles owned card */}
       <View style={styles.formCard}>
         <CardSection title="Vehicles Owned" iconName="construct-outline" />
         <ChipSelector
@@ -368,21 +350,20 @@ function Step2({ data, onChange }) {
         />
       </View>
 
-      {/* Vehicle registration */}
       <View style={styles.formCard}>
         <CardSection title="Vehicle Registration" iconName="car-outline" />
 
-        <InputField
+        <VoiceTextInput
           label="Primary Vehicle Number"
           value={data.vehicleNumber}
           onChangeText={(v) => onChange('vehicleNumber', v.toUpperCase())}
-          placeholder="e.g. MH 12 AB 3456"
+          placeholder="e.g. AP 12 AB 3456"
           icon="car-outline"
         />
 
         <View style={styles.rowFields}>
           <View style={styles.rowFieldHalf}>
-            <InputField
+            <VoiceTextInput
               label="Make / Brand"
               value={data.vehicleMake}
               onChangeText={(v) => onChange('vehicleMake', v)}
@@ -391,7 +372,7 @@ function Step2({ data, onChange }) {
             />
           </View>
           <View style={styles.rowFieldHalf}>
-            <InputField
+            <VoiceTextInput
               label="Model / Year"
               value={data.vehicleModel}
               onChangeText={(v) => onChange('vehicleModel', v)}
@@ -401,7 +382,7 @@ function Step2({ data, onChange }) {
           </View>
         </View>
 
-        <InputField
+        <VoiceTextInput
           label="Number of Vehicles Owned"
           value={data.vehicleCount}
           onChangeText={(v) => onChange('vehicleCount', v)}
@@ -439,24 +420,28 @@ function Step3({ data, onChange }) {
       <InfoBanner text="Your bank details are encrypted and stored securely. We never share them with third parties." />
 
       <View style={styles.formCard}>
-        <InputField
+        {/* Account holder name — voice very useful */}
+        <VoiceTextInput
           label="Account Holder Name"
           value={data.holderName}
           onChangeText={(v) => onChange('holderName', v)}
           placeholder="As per bank records"
           icon="person-outline"
+          hint="Speak your name as printed on your passbook"
         />
 
-        <InputField
+        {/* Account number — voice disabled for safety */}
+        <VoiceTextInput
           label="Account Number"
           value={data.accountNumber}
           onChangeText={(v) => onChange('accountNumber', v)}
           placeholder="Enter account number"
           icon="card-outline"
           keyboardType="number-pad"
+          voiceEnabled={false}
         />
 
-        {/* Confirm account with match/error feedback */}
+        {/* Confirm account — voice disabled always */}
         <View style={styles.fieldGroup}>
           <CustomText style={styles.fieldLabel}>Confirm Account Number</CustomText>
           <View style={[styles.inputBox, mismatch && styles.inputBoxError, match && styles.inputBoxMatch]}>
@@ -474,7 +459,7 @@ function Step3({ data, onChange }) {
               placeholderTextColor={color.TEXT_MUTED}
               keyboardType="number-pad"
             />
-            {match   && <Ionicons name="checkmark-circle" size={18} color={color.GREEN} />}
+            {match    && <Ionicons name="checkmark-circle" size={18} color={color.GREEN} />}
             {mismatch && <Ionicons name="close-circle" size={18} color="#c62828" />}
           </View>
           {mismatch && (
@@ -485,13 +470,15 @@ function Step3({ data, onChange }) {
           )}
         </View>
 
-        <InputField
+        {/* IFSC — voice disabled (alpha-numeric codes error-prone) */}
+        <VoiceTextInput
           label="IFSC Code"
           value={data.ifsc}
           onChangeText={(v) => onChange('ifsc', v.toUpperCase())}
           placeholder="e.g. SBIN0001234"
           icon="code-outline"
           hint="11-character code on your chequebook or passbook"
+          voiceEnabled={false}
         />
 
         <Dropdown
@@ -505,7 +492,6 @@ function Step3({ data, onChange }) {
         />
       </View>
 
-      {/* UPI alternative */}
       <View style={styles.dividerRow}>
         <View style={styles.dividerLine} />
         <CustomText style={styles.dividerText}>or link UPI instead</CustomText>
@@ -527,7 +513,7 @@ function Step3({ data, onChange }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// Main Screen
+// Main Screen (unchanged structure)
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function PersonalInfoScreen({ navigation }) {
   const [currentStep, setCurrentStep] = useState(1);
@@ -535,13 +521,11 @@ export default function PersonalInfoScreen({ navigation }) {
   const [step1, setStep1] = useState({
     photoUri: null, fullName: '', gender: '', age: '', mobile: '', address: '',
   });
-
   const [step2, setStep2] = useState({
     licenseNumber: '', licenseType: '', licenseIssueDate: '', licenseExpiry: '',
     experience: '', vehicleTypes: [], vehicleNumber: '', vehicleMake: '',
     vehicleModel: '', vehicleCount: '',
   });
-
   const [step3, setStep3] = useState({
     holderName: '', accountNumber: '', confirmAccount: '', ifsc: '', bankName: '',
   });
@@ -563,9 +547,6 @@ export default function PersonalInfoScreen({ navigation }) {
   const handleNext = () => {
     if (!canProceed) return;
     if (currentStep < TOTAL_STEPS) setCurrentStep((s) => s + 1);
-    else {
-      // Done — navigate.navigate('ProfileMain') etc.
-    }
   };
 
   const handleBack = () => {
@@ -579,16 +560,13 @@ export default function PersonalInfoScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <StatusBar style="dark" />
-
       <InnerScreenHeader
         navigation={{ goBack: handleBack }}
         title={STEP_META[currentStep - 1].label + ' Details'}
       />
-
       <View style={styles.stepIndicatorWrapper}>
         <StepIndicator current={currentStep} />
       </View>
-
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -622,11 +600,10 @@ export default function PersonalInfoScreen({ navigation }) {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// ─── Styles (identical to original — no layout changes) ───────────────────────
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.SURFACE },
 
-  // ── Step Indicator ──────────────────────────────────────────────────────────
   stepIndicatorWrapper: { paddingHorizontal: 24, paddingBottom: 16 },
   stepIndicatorRow:     { flexDirection: 'row', alignItems: 'flex-start' },
   stepNode:             { alignItems: 'center', gap: 6, width: 72 },
@@ -644,16 +621,13 @@ const styles = StyleSheet.create({
   stepLine:             { height: 2, borderRadius: 99, backgroundColor: color.BORDER_LIGHT },
   stepLineDone:         { backgroundColor: color.GREEN },
 
-  // ── Scroll ──────────────────────────────────────────────────────────────────
   scrollContent: { paddingHorizontal: 20, paddingBottom: 20 },
   stepContent:   { gap: 20 },
 
-  // ── Title ───────────────────────────────────────────────────────────────────
   titleBlock:   { gap: 6 },
   pageTitle:    { ...globalStyles.f16Bold,    color: color.TEXT_MAIN, lineHeight: 28 },
   pageSubtitle: { ...globalStyles.f12Regular, color: color.TEXT_SUB,  lineHeight: 20 },
 
-  // ── Avatar ──────────────────────────────────────────────────────────────────
   avatarSection:          { alignItems: 'center', gap: 10 },
   avatarContainer:        { position: 'relative' },
   avatarImagePlaceholder: {
@@ -672,7 +646,6 @@ const styles = StyleSheet.create({
   uploadPhotoBtn:  { flexDirection: 'row', alignItems: 'center', gap: 5 },
   uploadPhotoText: { ...globalStyles.f12Bold, color: color.GREEN },
 
-  // ── Form Card ───────────────────────────────────────────────────────────────
   formCard: {
     backgroundColor: color.WHITE,
     borderRadius: 20, padding: 20, gap: 20,
@@ -681,7 +654,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05, shadowRadius: 12, elevation: 2,
   },
 
-  // ── Card Section Header ──────────────────────────────────────────────────────
   cardSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: -4 },
   cardSectionIconBox: {
     width: 28, height: 28, borderRadius: 8,
@@ -690,10 +662,9 @@ const styles = StyleSheet.create({
   },
   cardSectionTitle: { ...globalStyles.f12Bold, color: color.GREEN },
 
-  // ── Fields ──────────────────────────────────────────────────────────────────
-  fieldGroup:      { gap: 8 },
-  fieldLabel:      { ...globalStyles.f12Bold, color: color.TEXT_MAIN },
-  fieldHint:       { ...globalStyles.f10Regular, color: color.TEXT_MUTED, lineHeight: 16 },
+  fieldGroup:  { gap: 8 },
+  fieldLabel:  { ...globalStyles.f12Bold, color: color.TEXT_MAIN },
+  fieldHint:   { ...globalStyles.f10Regular, color: color.TEXT_MUTED, lineHeight: 16 },
   inputBox: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: color.SURFACE_LOW,
@@ -707,15 +678,12 @@ const styles = StyleSheet.create({
   input:           { flex: 1, ...globalStyles.f12Regular, color: color.TEXT_MAIN, padding: 0 },
   dropdownValue:   { ...globalStyles.f12Regular, color: color.TEXT_MAIN, flex: 1 },
 
-  // ── Inline error ────────────────────────────────────────────────────────────
   inlineError:     { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: -2 },
   inlineErrorText: { ...globalStyles.f10Regular, color: '#c62828' },
 
-  // ── Row fields ──────────────────────────────────────────────────────────────
   rowFields:    { flexDirection: 'row', gap: 12 },
   rowFieldHalf: { flex: 1 },
 
-  // ── Chips ───────────────────────────────────────────────────────────────────
   chipLabelRow:  { flexDirection: 'row', alignItems: 'center', marginBottom: -2 },
   chipsWrap:     { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
@@ -728,7 +696,6 @@ const styles = StyleSheet.create({
   chipText:       { ...globalStyles.f12Regular, color: color.TEXT_SUB  },
   chipTextActive: { ...globalStyles.f12Bold,    color: color.GREEN     },
 
-  // ── Dropdown modal ──────────────────────────────────────────────────────────
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   dropdownSheet: {
     backgroundColor: color.WHITE,
@@ -745,7 +712,6 @@ const styles = StyleSheet.create({
   dropdownOptionText:       { ...globalStyles.f14Regular, color: color.TEXT_MAIN },
   dropdownOptionTextActive: { ...globalStyles.f14Bold,    color: color.GREEN     },
 
-  // ── Info Banner ─────────────────────────────────────────────────────────────
   infoBanner: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10,
     backgroundColor: color.GREEN_BG, borderRadius: 14, padding: 14,
@@ -753,12 +719,10 @@ const styles = StyleSheet.create({
   },
   infoBannerText: { ...globalStyles.f12Regular, color: color.GREEN_DARK, flex: 1, lineHeight: 18 },
 
-  // ── Divider row (UPI) ────────────────────────────────────────────────────────
   dividerRow:  { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 },
   dividerLine: { flex: 1, height: 1, backgroundColor: color.BORDER_LIGHT },
   dividerText: { ...globalStyles.f12Regular, color: color.TEXT_MUTED },
 
-  // ── UPI button ──────────────────────────────────────────────────────────────
   upiBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     backgroundColor: color.WHITE, borderRadius: 16,
@@ -773,7 +737,6 @@ const styles = StyleSheet.create({
   upiBtnTitle: { ...globalStyles.f14Bold,    color: color.GREEN       },
   upiBtnSub:   { ...globalStyles.f10Regular, color: color.TEXT_MUTED, marginTop: 2 },
 
-  // ── Bottom bar ──────────────────────────────────────────────────────────────
   bottomBar: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     backgroundColor: color.SURFACE,

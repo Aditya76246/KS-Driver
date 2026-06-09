@@ -20,14 +20,27 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.itglansa.KSD"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-font",
-      "expo-localization"
-    ]
+      "expo-localization",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Allow KisanSahakar to use the microphone for voice input",
+          "speechRecognitionPermission": "Allow KisanSahakar to use speech recognition"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4bfd9290-2429-4296-b645-655f692413ba"
+      }
+    }
   }
 }
