@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useContext } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -19,26 +19,47 @@ import HomeStackNavigator from './HomeStackNavigator';
 import BookingsStackNavigator from './BookingsStackNavigator';
 import EarningsStackNavigator from './EarningsStackNavigator';
 import ProfileStackNavigator from './ProfileStackNavigator';
+import GigHomeStackNavigator from './GigHomeStackNavigator';
+import GigJobsStackNavigator from './GigJobsStackNavigator';
+
+import { AuthContext } from '../context/AuthContext';
 import { color } from '../styles/theme';
 
 const Tab = createBottomTabNavigator();
 
-const TAB_CONFIG = [
+// ─── Tab configs per role ─────────────────────────────────────────────────────
+
+const DRIVER_TAB_CONFIG = [
   { name: 'HomeTab', label: 'Home', icon: 'home', iconOutline: 'home-outline' },
   { name: 'BookingsTab', label: 'Bookings', icon: 'clipboard', iconOutline: 'clipboard-outline' },
   { name: 'EarningsTab', label: 'Earnings', icon: 'cash', iconOutline: 'cash-outline' },
   { name: 'ProfileTab', label: 'Profile', icon: 'person-circle', iconOutline: 'person-circle-outline' },
 ];
 
-const TAB_ROOT_ROUTES = {
+const GIG_TAB_CONFIG = [
+  { name: 'HomeTab', label: 'Home', icon: 'home', iconOutline: 'home-outline' },
+  { name: 'BookingsTab', label: 'Jobs', icon: 'briefcase', iconOutline: 'briefcase-outline' },
+  { name: 'EarningsTab', label: 'Earnings', icon: 'cash', iconOutline: 'cash-outline' },
+  { name: 'ProfileTab', label: 'Profile', icon: 'person-circle', iconOutline: 'person-circle-outline' },
+];
+
+// ─── Root screen names per role (for inner-screen detection) ──────────────────
+
+const DRIVER_ROOT_ROUTES = {
   HomeTab: 'HomeMain',
   BookingsTab: 'BookingsMain',
   EarningsTab: 'EarningsMain',
   ProfileTab: 'ProfileMain',
 };
 
+const GIG_ROOT_ROUTES = {
+  HomeTab: 'GigHomeMain',
+  BookingsTab: 'GigJobsMain',
+  EarningsTab: 'EarningsMain',
+  ProfileTab: 'ProfileMain',
+};
+
 // ─── Seed notification data ───────────────────────────────────────────────────
-// In production, fetch this from your API / push notification handler.
 const SEED_NOTIFICATIONS = [
   {
     id: 'n1',
@@ -107,13 +128,15 @@ const SEED_NOTIFICATIONS = [
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-function isInnerStackScreen(route) {
-  const rootRouteName = TAB_ROOT_ROUTES[route.name];
+
+function isInnerStackScreen(route, rootRoutes) {
+  const rootRouteName = rootRoutes[route.name];
   const focusedRouteName = getFocusedRouteNameFromRoute(route);
   return Boolean(focusedRouteName && focusedRouteName !== rootRouteName);
 }
 
 // ─── Animated Tab Button ──────────────────────────────────────────────────────
+
 function TabButton({ tab, isFocused, onPress, onLongPress }) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const bgAnim = useRef(new Animated.Value(0)).current;
@@ -171,14 +194,15 @@ function TabButton({ tab, isFocused, onPress, onLongPress }) {
 }
 
 // ─── Custom Tab Bar ───────────────────────────────────────────────────────────
-function CustomTabBar({ state, descriptors, navigation }) {
+
+function CustomTabBar({ state, descriptors, navigation, tabConfig, rootRoutes }) {
   const insets = useSafeAreaInsets();
 
   const focusedRoute = state.routes[state.index];
   const focusedDescriptor = descriptors[focusedRoute.key];
   const tabBarStyle = focusedDescriptor?.options?.tabBarStyle;
 
-  if (isInnerStackScreen(focusedRoute) || tabBarStyle?.display === 'none') {
+  if (isInnerStackScreen(focusedRoute, rootRoutes) || tabBarStyle?.display === 'none') {
     return null;
   }
 
@@ -186,7 +210,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
     <View style={[styles.tabBarWrapper, { paddingBottom: insets.bottom }]}>
       <View style={styles.tabBar}>
         {state.routes.map((route, index) => {
-          const tab = TAB_CONFIG.find((t) => t.name === route.name);
+          const tab = tabConfig.find((t) => t.name === route.name);
           if (!tab) return null;
 
           const isFocused = state.index === index;
@@ -199,7 +223,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
             });
             if (!event.defaultPrevented) {
               if (isFocused) {
-                navigation.navigate(route.name, { screen: TAB_ROOT_ROUTES[route.name] });
+                navigation.navigate(route.name, { screen: rootRoutes[route.name] });
               } else {
                 navigation.navigate(route.name);
               }
@@ -224,14 +248,18 @@ function CustomTabBar({ state, descriptors, navigation }) {
 }
 
 // ─── Main Navigator ───────────────────────────────────────────────────────────
+
 export default function MainTabNavigator() {
-  // Notification state lives here so the header badge and sheet stay in sync.
+  const { userRole } = useContext(AuthContext);
+
+  const TAB_CONFIG = userRole === 'gigWorker' ? GIG_TAB_CONFIG : DRIVER_TAB_CONFIG;
+  const TAB_ROUTES = userRole === 'gigWorker' ? GIG_ROOT_ROUTES : DRIVER_ROOT_ROUTES;
+
   const [notifications, setNotifications] = useState(SEED_NOTIFICATIONS);
   const [sheetVisible, setSheetVisible] = useState(false);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  // Exposed to NotificationSheet so it can mutate the shared list
   const handleNotificationsChange = useCallback((updater) => {
     setNotifications(updater);
   }, []);
@@ -239,10 +267,12 @@ export default function MainTabNavigator() {
   return (
     <>
       <Tab.Navigator
-        tabBar={(props) => <CustomTabBar {...props} />}
+        tabBar={(props) => (
+          <CustomTabBar {...props} tabConfig={TAB_CONFIG} rootRoutes={TAB_ROUTES} />
+        )}
         screenOptions={({ route }) => ({
           header: ({ navigation, options }) => {
-            if (isInnerStackScreen(route) || options?.tabBarStyle?.display === 'none') {
+            if (isInnerStackScreen(route, TAB_ROUTES) || options?.tabBarStyle?.display === 'none') {
               return null;
             }
             return (
@@ -254,16 +284,28 @@ export default function MainTabNavigator() {
           },
         })}
       >
-        <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ title: 'Home' }} />
-        <Tab.Screen name="BookingsTab" component={BookingsStackNavigator} options={{ title: 'Bookings' }} />
-        <Tab.Screen name="EarningsTab" component={EarningsStackNavigator} options={{ title: 'Earnings' }} />
-        <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ title: 'Profile' }} />
+        <Tab.Screen
+          name="HomeTab"
+          component={userRole === 'gigWorker' ? GigHomeStackNavigator : HomeStackNavigator}
+          options={{ title: 'Home' }}
+        />
+        <Tab.Screen
+          name="BookingsTab"
+          component={userRole === 'gigWorker' ? GigJobsStackNavigator : BookingsStackNavigator}
+          options={{ title: userRole === 'gigWorker' ? 'Jobs' : 'Bookings' }}
+        />
+        <Tab.Screen
+          name="EarningsTab"
+          component={EarningsStackNavigator}
+          options={{ title: 'Earnings' }}
+        />
+        <Tab.Screen
+          name="ProfileTab"
+          component={ProfileStackNavigator}
+          options={{ title: 'Profile' }}
+        />
       </Tab.Navigator>
 
-      {/*
-        NotificationSheet is rendered outside the navigator so it overlays
-        the entire screen (tab bar + header) without z-index fighting.
-      */}
       <NotificationSheet
         visible={sheetVisible}
         onClose={() => setSheetVisible(false)}

@@ -1,35 +1,33 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import ProfileScreen from '../screens/ProfileScreen';
-import PersonalInfoScreen from '../screens/PersonalInfoScreen';
-import DocumentsScreen from '../screens/DocumentsScreen';
-import TermsScreen from '../screens/TermsScreen';
-import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
-import HelpSupportScreen from '../screens/HelpSupportScreen';
-import AboutScreen from '../screens/AboutScreen';
+import { AuthContext } from '../context/AuthContext';
+
+import ProfileScreen         from '../screens/ProfileScreen';
+import PersonalInfoScreen    from '../screens/PersonalInfoScreen';
+import GigPersonalInfoScreen from '../screens/gigWorker/GigPersonalInfoScreen';
+import DocumentsScreen       from '../screens/DocumentsScreen';
+import TermsScreen           from '../screens/TermsScreen';
+import PrivacyPolicyScreen   from '../screens/PrivacyPolicyScreen';
+import HelpSupportScreen     from '../screens/HelpSupportScreen';
+import AboutScreen           from '../screens/AboutScreen';
 import SpeechCommandDemoScreen from '../screens/SpeechCommandDemoScreen';
-import ChooseLanguage from '../components/ChooseLanguage';
+import ChooseLanguage        from '../components/ChooseLanguage';
 
 const Stack = createStackNavigator();
 
 export default function ProfileStackNavigator() {
+  const { userRole } = useContext(AuthContext);
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
 
-      {/* ── Root screen ── */}
-      <Stack.Screen
-        name="ProfileMain"
-        component={ProfileScreen}
-      />
+      <Stack.Screen name="ProfileMain" component={ProfileScreen} />
 
-      {/* ── Inner screens ── */}
       <Stack.Screen
         name="PersonalInfo"
-        component={PersonalInfoScreen}
-        options={{
-          tabBarStyle: { display: 'none' },
-        }}
+        component={userRole === 'gigWorker' ? GigPersonalInfoScreen : PersonalInfoScreen}
+        options={{ tabBarStyle: { display: 'none' } }}
       />
 
       <Stack.Screen
@@ -71,9 +69,7 @@ export default function ProfileStackNavigator() {
       <Stack.Screen
         name="about"
         component={AboutScreen}
-        options={{
-          tabBarStyle: { display: 'none' },
-        }}
+        options={{ tabBarStyle: { display: 'none' } }}
       />
 
     </Stack.Navigator>

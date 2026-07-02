@@ -11,7 +11,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import CustomText from '../components/CustomText';
 import globalStyles from '../styles/globalStyles';
 import { color } from '../styles/theme';
-import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../context/LanguageContext';
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 const BOOKING_REQUESTS = [
@@ -176,7 +176,7 @@ function BookingCard({ booking, onAccept, onReject, delay = 0 }) {
 export default function HomeScreen({ navigation }) {
   const [bookings, setBookings] = useState(BOOKING_REQUESTS);
   const [profileComplete] = useState(false);
-  const { t } = useTranslation();
+  const { t } = useLanguage();
 
   const handleAccept = (id) => {
     setBookings((prev) => prev.filter((b) => b.id !== id));

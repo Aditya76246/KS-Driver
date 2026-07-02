@@ -10,7 +10,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useTranslation } from "react-i18next";
 
 import globalStyles from "../styles/globalStyles";
 import { color } from "../styles/theme";
@@ -25,8 +24,7 @@ const languages = [
 ];
 
 export default function ChooseLanguage() {
-  const { locale, changeLanguage } = useLanguage();
-  const { t } = useTranslation();
+  const { locale, changeLanguage, t } = useLanguage();
   const navigation = useNavigation();
   const route = useRoute();
 

@@ -1,20 +1,13 @@
 import React from 'react';
 import { Text } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../context/LanguageContext';
 
 const CustomText = ({ children, style, numberOfLines, ...props }) => {
-  const { i18n } = useTranslation();
-  const textMap = i18n.getResourceBundle(i18n.language)?.text || {};
+  const { t } = useLanguage();
 
   const translateChild = (child) => {
-    if (typeof child === 'string') {
-      return textMap[child] || child;
-    }
-
-    if (Array.isArray(child)) {
-      return child.map(translateChild);
-    }
-
+    if (typeof child === 'string') return t(child);
+    if (Array.isArray(child)) return child.map(translateChild);
     return child;
   };
 

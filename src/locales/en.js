@@ -201,7 +201,20 @@ const text = {
   "Oct 18, 08:00 AM": "Oct 18, 08:00 AM",
   "Oct 15, 10:00 AM": "Oct 15, 10:00 AM",
   "Oct 12, 09:30 AM": "Oct 12, 09:30 AM",
-  "Earnings Screen": "Earnings Screen"
+  "Earnings Screen": "Earnings Screen",
+  "Jobs": "Jobs",
+  "Available Gigs": "Available Gigs",
+  "My Jobs": "My Jobs",
+  "Apply for Gig": "Apply for Gig",
+  "Applied": "Applied",
+  "Gig Worker": "Gig Worker",
+  "Equipment Driver": "Equipment Driver",
+  "No gigs available nearby": "No gigs available nearby",
+  "Jobs Done": "Jobs Done",
+  "Work Types": "Work Types",
+  "Mark as Completed": "Mark as Completed",
+  "Years of Experience": "Years of Experience",
+  "Work Profile": "Work Profile"
 };
 
 export default {

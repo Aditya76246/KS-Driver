@@ -13,6 +13,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import CustomText from '../components/CustomText';
 import globalStyles from '../styles/globalStyles';
 import { color } from '../styles/theme';
+import { useAuth } from '../context/AuthContext';
 
 // ─── Profile completion steps ─────────────────────────────────────────────────
 const COMPLETION_STEPS = [
@@ -79,6 +80,7 @@ function MenuItem({ item, onPress, isLast }) {
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function ProfileScreen({ navigation }) {
+  const { userRole, user } = useAuth();
   const completionPct = 66;
 
   const handleMenuPress = (id) => {
@@ -120,20 +122,22 @@ export default function ProfileScreen({ navigation }) {
 
             {/* Info */}
             <View style={styles.profileInfo}>
-              <CustomText style={styles.profileName}>Ramesh Patil</CustomText>
+              <CustomText style={styles.profileName}>{user?.name || 'Kisan Sahakar User'}</CustomText>
 
               <View style={styles.roleBadge}>
-                <MaterialCommunityIcons name="calendar-month-outline" size={13} color={color.GREEN} />
-                <CustomText style={styles.roleText}>Individual Farmer</CustomText>
+                <MaterialCommunityIcons
+                  name={userRole === 'gigWorker' ? 'account-hard-hat' : 'tractor'}
+                  size={13}
+                  color={color.GREEN}
+                />
+                <CustomText style={styles.roleText}>
+                  {userRole === 'gigWorker' ? 'Gig Worker' : 'Equipment Driver'}
+                </CustomText>
               </View>
 
               <View style={styles.contactRow}>
                 <Ionicons name="call-outline" size={14} color={color.TEXT_SUB} />
-                <CustomText style={styles.contactText}>+91 98765 43210</CustomText>
-              </View>
-              <View style={styles.contactRow}>
-                <Ionicons name="mail-outline" size={14} color={color.TEXT_SUB} />
-                <CustomText style={styles.contactText}>rameshpatil@gmail.com</CustomText>
+                <CustomText style={styles.contactText}>{user?.mobile || '+91 XXXXX XXXXX'}</CustomText>
               </View>
             </View>
 

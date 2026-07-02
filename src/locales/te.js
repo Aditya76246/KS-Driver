@@ -207,7 +207,20 @@ const text = {
   "Open Maps": "మ్యాప్ తెరవండి",
   "Away": "దూరంగా",
   "Navigating to Farm": "పొలానికి వెళ్తున్నారు",
-  "Tap Open Maps to get directions":"దిశానిర్దేశోలను పొందడానికి మ్యాప్ తెరవండి పై నొక్కండి",
+  "Tap Open Maps to get directions": "దిశానిర్దేశోలను పొందడానికి మ్యాప్ తెరవండి పై నొక్కండి",
+  "Jobs": "పనులు",
+  "Available Gigs": "అందుబాటులో ఉన్న పనులు",
+  "My Jobs": "నా పనులు",
+  "Apply for Gig": "పనికి దరఖాస్తు చేయండి",
+  "Applied": "దరఖాస్తు చేశారు",
+  "Gig Worker": "గిగ్ వర్కర్",
+  "Equipment Driver": "పరికర నడపేవారు",
+  "No gigs available nearby": "సమీపంలో పనులు అందుబాటులో లేవు",
+  "Jobs Done": "పూర్తయిన పనులు",
+  "Work Types": "పని రకాలు",
+  "Mark as Completed": "పూర్తయిందిగా గుర్తించండి",
+  "Years of Experience": "అనుభవ సంవత్సరాలు",
+  "Work Profile": "పని ప్రొఫైల్",
 };
 
 export default {

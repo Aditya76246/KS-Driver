@@ -8,7 +8,7 @@ import {
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../context/LanguageContext';
 
 import CustomText from '../components/CustomText';
 import globalStyles from '../styles/globalStyles';
@@ -217,9 +217,7 @@ function TransactionCard({ txn, index }) {
 
 export default function EarningsScreen() {
   const [activePeriod, setActivePeriod] = useState('week');
-  const { i18n } = useTranslation();
-  const textMap = i18n.getResourceBundle(i18n.language)?.text || {};
-  const tx = (value) => textMap[value] || value;
+  const { t: tx } = useLanguage();
   const stats = STATS[activePeriod];
 
   return (

@@ -16,11 +16,11 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import CustomText from '../components/CustomText';
 import InnerScreenHeader from '../components/InnerScreenHeader';
-import VoiceTextInput from '../components/VoiceTextInput';   // ← NEW
+import VoiceTextInput from '../components/VoiceTextInput';
 import globalStyles from '../styles/globalStyles';
 import { color } from '../styles/theme';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Constants
 const TOTAL_STEPS = 3;
 
 const GENDER_OPTIONS     = ['Male', 'Female', 'Other', 'Prefer not to say'];
@@ -39,9 +39,6 @@ const STEP_META = [
   { label: 'Bank',     icon: 'business-outline' },
 ];
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// Shared Sub-components (unchanged except InputField → VoiceTextInput)
-// ═══════════════════════════════════════════════════════════════════════════════
 
 function StepIndicator({ current }) {
   return (
