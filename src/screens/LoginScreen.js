@@ -15,7 +15,6 @@ import { StatusBar } from 'expo-status-bar';
 import Animated, {
   FadeIn,
   FadeOut,
-  Layout,
   useSharedValue,
   useAnimatedStyle,
   withTiming,
@@ -148,7 +147,8 @@ export default function LoginScreen() {
       >
         <KeyboardAvoidingView
           style={{ flex: 1, justifyContent: 'flex-end' }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
           <ScrollView
             contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
@@ -156,7 +156,6 @@ export default function LoginScreen() {
           >
             <Animated.View
               style={[styles.bottomContainer, animatedStyle]}
-              layout={Layout.springify()}
             >
               <CustomText style={styles.secTitle}>SECURE LOGIN</CustomText>
 
@@ -184,7 +183,6 @@ export default function LoginScreen() {
                 <Animated.View
                   entering={FadeIn}
                   exiting={FadeOut}
-                  layout={Layout.springify()}
                 >
                   <CustomText style={[styles.label, { marginTop: 16 }]}>
                     Enter OTP

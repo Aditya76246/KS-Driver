@@ -1,403 +1,420 @@
-import React, { useMemo, useState } from 'react';
+import React, { memo, useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
   StyleSheet,
-  TouchableOpacity,
+  TextInput,
   View,
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 
 import CustomText from '../components/CustomText';
 import InnerScreenHeader from '../components/InnerScreenHeader';
-import VoiceInputButton from '../components/VoiceInputButton';
-import { useLanguage } from '../context/LanguageContext';
+import useConversationalBooking, { ConversationPhase } from '../hooks/useConversationalBooking';
 import globalStyles from '../styles/globalStyles';
 import { color } from '../styles/theme';
 
-const DUMMY_COMMAND_RESPONSES = {
-  bookings: {
-    title: 'Booking Requests',
-    summary: '4 nearby requests found',
-    items: [
-      {
-        id: 'BK-1024',
-        title: 'Tractor for field ploughing',
-        subtitle: 'Kandukur, Nellore',
-        meta: 'Today, 3:30 PM',
-        amount: '₹2,400',
-        status: 'New',
-      },
-      {
-        id: 'BK-1025',
-        title: 'Rotavator service',
-        subtitle: 'Kovur, Nellore',
-        meta: 'Tomorrow, 8:00 AM',
-        amount: '₹1,800',
-        status: 'Pending',
-      },
-      {
-        id: 'BK-1026',
-        title: 'Harvester booking',
-        subtitle: 'Atmakur, Nellore',
-        meta: '12 Jun, 6:00 AM',
-        amount: '₹5,500',
-        status: 'High value',
-      },
-      {
-        id: 'BK-1027',
-        title: 'Trolley transport',
-        subtitle: 'Buchi, Nellore',
-        meta: '13 Jun, 10:15 AM',
-        amount: '₹1,200',
-        status: 'New',
-      },
-    ],
-  },
-  earnings: {
-    title: 'Recent Earnings',
-    summary: '3 payments in the last 7 days',
-    items: [
-      {
-        id: 'PAY-7781',
-        title: 'Completed ploughing job',
-        subtitle: 'Paid to HDFC account',
-        meta: 'Today',
-        amount: '₹2,250',
-        status: 'Paid',
-      },
-      {
-        id: 'PAY-7775',
-        title: 'Rotavator rental',
-        subtitle: 'Settlement processing',
-        meta: 'Yesterday',
-        amount: '₹1,650',
-        status: 'Processing',
-      },
-      {
-        id: 'PAY-7768',
-        title: 'Harvester service',
-        subtitle: 'Paid to HDFC account',
-        meta: '05 Jun',
-        amount: '₹4,900',
-        status: 'Paid',
-      },
-    ],
-  },
-  vehicles: {
-    title: 'Vehicle Status',
-    summary: '3 registered vehicles found',
-    items: [
-      {
-        id: 'VH-201',
-        title: 'Mahindra 575 DI',
-        subtitle: 'AP 12 AB 3456',
-        meta: 'Tractor',
-        amount: 'Online',
-        status: 'Ready',
-      },
-      {
-        id: 'VH-202',
-        title: 'Rotavator attachment',
-        subtitle: 'Linked to Mahindra 575 DI',
-        meta: 'Equipment',
-        amount: 'Available',
-        status: 'Ready',
-      },
-      {
-        id: 'VH-203',
-        title: 'Trolley',
-        subtitle: 'AP 12 TR 9087',
-        meta: 'Transport',
-        amount: 'Offline',
-        status: 'Needs update',
-      },
-    ],
-  },
+const PHASE_LABELS = {
+  [ConversationPhase.IDLE]:       'Tap the mic to speak, or type below.',
+  [ConversationPhase.LISTENING]:  'Listening… speak now (up to 10 seconds).',
+  [ConversationPhase.THINKING]:   'Processing your request…',
+  [ConversationPhase.SPEAKING]:   'Speaking… please wait.',
+  [ConversationPhase.CONFIRMING]: 'Say "Yes" to confirm or "No" to cancel.',
+  [ConversationPhase.BOOKING]:    'Creating your booking…',
+  [ConversationPhase.ERROR]:      'Something went wrong. Please try again.',
 };
 
-const COMMANDS = [
-  {
-    key: 'bookings',
-    labels: {
-      en: 'Show bookings',
-      hi: 'बुकिंग दिखाओ',
-      te: 'బుకింగ్స్ చూపించు',
-    },
-    icon: 'calendar-check-outline',
-    keywords: [
-      'booking',
-      'bookings',
-      'request',
-      'requests',
-      'jobs',
-      'job',
-      'बुकिंग',
-      'बुकिंग्स',
-      'अनुरोध',
-      'रिक्वेस्ट',
-      'काम',
-      'జాబ్',
-      'జాబ్స్',
-      'బుకింగ్',
-      'బుకింగ్స్',
-      'రిక్వెస్ట్',
-      'రిక్వెస్టులు',
-      'పని',
-      'పనులు',
-    ],
-  },
-  {
-    key: 'earnings',
-    labels: {
-      en: 'Show earnings',
-      hi: 'कमाई दिखाओ',
-      te: 'ఆదాయం చూపించు',
-    },
-    icon: 'cash-multiple',
-    keywords: [
-      'earning',
-      'earnings',
-      'payment',
-      'payments',
-      'income',
-      'money',
-      'कमाई',
-      'आमदनी',
-      'पेमेंट',
-      'भुगतान',
-      'पैसा',
-      'పేమెంట్',
-      'పేమెంట్స్',
-      'చెల్లింపు',
-      'చెల్లింపులు',
-      'ఆదాయం',
-      'సంపాదన',
-      'డబ్బు',
-    ],
-  },
-  {
-    key: 'vehicles',
-    labels: {
-      en: 'Show vehicles',
-      hi: 'वाहन दिखाओ',
-      te: 'వాహనాలు చూపించు',
-    },
-    icon: 'tractor',
-    keywords: [
-      'vehicle',
-      'vehicles',
-      'tractor',
-      'equipment',
-      'machine',
-      'वाहन',
-      'गाड़ी',
-      'गाडियां',
-      'ट्रैक्टर',
-      'मशीन',
-      'उपकरण',
-      'వాహనం',
-      'వాహనాలు',
-      'ట్రాక్టర్',
-      'యంత్రం',
-      'పరికరం',
-      'పరికరాలు',
-    ],
-  },
+// ─── Isolated 10-second progress ticker ──────────────────────────────────────
+const ListeningTimer = memo(function ListeningTimer({ isListening }) {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    if (!isListening) { setSeconds(0); return; }
+    setSeconds(0);
+    const id = setInterval(() => setSeconds(s => s < 10 ? s + 1 : 10), 1000);
+    return () => clearInterval(id);
+  }, [isListening]);
+
+  if (!isListening) return null;
+
+  return (
+    <View style={styles.listeningBar}>
+      <View style={[styles.listeningProgress, { width: `${(seconds / 10) * 100}%` }]} />
+    </View>
+  );
+});
+
+const SLOTS_IN_ORDER = [
+  { slot: 'service_type', label: 'Service' },
+  { slot: 'area_acres',   label: 'Area'    },
+  { slot: 'date',         label: 'Date'    },
+  { slot: 'village',      label: 'Village' },
 ];
 
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+// ─── Step progress — horizontal 4-step tracker ───────────────────────────────
+const StepProgress = memo(function StepProgress({ slots, isComplete }) {
+  const currentIndex = isComplete
+    ? SLOTS_IN_ORDER.length
+    : SLOTS_IN_ORDER.findIndex(({ slot }) => !slots[slot]);
 
-function resolveCommandKey(commandText) {
-  const normalized = commandText.toLowerCase();
-  return COMMANDS.find((command) =>
-    command.keywords.some((keyword) => normalized.includes(keyword))
-  )?.key ?? 'bookings';
-}
-
-function getCommandLabel(command, locale) {
-  return command.labels[locale] ?? command.labels.en;
-}
-
-async function fetchDummyCommandData(commandText) {
-  const commandKey = resolveCommandKey(commandText);
-  await wait(700);
-
-  return {
-    commandKey,
-    commandText,
-    requestedAt: new Date().toISOString(),
-    data: DUMMY_COMMAND_RESPONSES[commandKey],
-  };
-}
-
-function CommandChip({ command, label, selected, onPress }) {
   return (
-    <TouchableOpacity
-      style={[styles.commandChip, selected && styles.commandChipActive]}
-      onPress={onPress}
-      activeOpacity={0.78}
-    >
-      <MaterialCommunityIcons
-        name={command.icon}
-        size={16}
-        color={selected ? color.WHITE : color.GREEN}
-      />
-      <CustomText style={[styles.commandChipText, selected && styles.commandChipTextActive]}>
-        {label}
-      </CustomText>
-    </TouchableOpacity>
-  );
-}
+    <View style={styles.stepRow}>
+      {SLOTS_IN_ORDER.map(({ slot, label }, index) => {
+        const isDone    = Boolean(slots[slot]);
+        const isCurrent = index === currentIndex;
+        const isLast    = index === SLOTS_IN_ORDER.length - 1;
 
-function ResultItem({ item, index }) {
+        return (
+          <React.Fragment key={slot}>
+            <View style={styles.stepItem}>
+              <View style={[
+                styles.stepCircle,
+                isDone    && styles.stepCircleDone,
+                isCurrent && styles.stepCircleCurrent,
+              ]}>
+                {isDone
+                  ? <Ionicons name="checkmark" size={10} color={color.WHITE} />
+                  : <CustomText style={[styles.stepNum, isCurrent && styles.stepNumCurrent]}>
+                      {index + 1}
+                    </CustomText>
+                }
+              </View>
+              <CustomText style={[
+                styles.stepLabel,
+                isDone    && styles.stepLabelDone,
+                isCurrent && styles.stepLabelCurrent,
+              ]}>
+                {label}
+              </CustomText>
+              <CustomText style={styles.stepValue} numberOfLines={1}>
+                {slots[slot] || (isCurrent ? '…' : '—')}
+              </CustomText>
+            </View>
+
+            {!isLast && (
+              <View style={[styles.stepConnector, isDone && styles.stepConnectorFilled]} />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </View>
+  );
+});
+
+// ─── Message bubble ───────────────────────────────────────────────────────────
+const MessageBubble = memo(function MessageBubble({ item, isPartial }) {
+  const isFarmer = item.role === 'farmer';
   return (
     <Animated.View
-      entering={FadeInDown.delay(index * 40).duration(260)}
-      style={styles.resultItem}
+      entering={FadeIn.duration(200)}
+      style={[styles.messageRow, isFarmer ? styles.messageRowFarmer : styles.messageRowAssistant]}
     >
-      <View style={styles.resultIconBox}>
-        <Ionicons name="document-text-outline" size={18} color={color.GREEN} />
-      </View>
-      <View style={styles.resultBody}>
-        <View style={styles.resultTitleRow}>
-          <CustomText style={styles.resultTitle}>{item.title}</CustomText>
-          <CustomText style={styles.resultAmount}>{item.amount}</CustomText>
-        </View>
-        <CustomText style={styles.resultSub}>{item.subtitle}</CustomText>
-        <View style={styles.resultMetaRow}>
-          <CustomText style={styles.resultMeta}>{item.meta}</CustomText>
-          <View style={styles.statusPill}>
-            <CustomText style={styles.statusText}>{item.status}</CustomText>
-          </View>
-        </View>
+      <View style={[
+        styles.messageBubble,
+        isFarmer ? styles.messageBubbleFarmer : styles.messageBubbleAssistant,
+        isPartial && styles.messageBubblePartial,
+      ]}>
+        <CustomText style={[
+          styles.messageText,
+          isFarmer ? styles.messageTextFarmer : styles.messageTextAssistant,
+        ]}>
+          {item.text}{isPartial ? ' …' : ''}
+        </CustomText>
       </View>
     </Animated.View>
   );
-}
+});
 
-export default function SpeechCommandDemoScreen({ navigation }) {
-  const { locale } = useLanguage();
-  const [transcript, setTranscript] = useState('');
-  const [partialTranscript, setPartialTranscript] = useState('');
-  const [selectedCommand, setSelectedCommand] = useState('');
-  const [response, setResponse] = useState(null);
-  const [loading, setLoading] = useState(false);
+// ─── Voice control panel ─────────────────────────────────────────────────────
+const VoicePanel = memo(function VoicePanel({
+  phase, slots, isComplete, error, bookingResult,
+  hasMessages, onBegin, onListen, onStop, onReset, onConfirm,
+}) {
+  const isListening  = phase === ConversationPhase.LISTENING;
+  const isConfirming = phase === ConversationPhase.CONFIRMING;
+  const isBusy = phase === ConversationPhase.SPEAKING
+    || phase === ConversationPhase.BOOKING
+    || phase === ConversationPhase.THINKING;
 
-  const displayText = partialTranscript || transcript || 'Tap mic and speak';
+  const indicator = useMemo(() => {
+    const map = {
+      [ConversationPhase.LISTENING]:  '🎤 LIVE',
+      [ConversationPhase.SPEAKING]:   '🔊 SPEAKING',
+      [ConversationPhase.THINKING]:   '⏳ THINKING',
+      [ConversationPhase.BOOKING]:    '📤 BOOKING',
+      [ConversationPhase.CONFIRMING]: '✅ CONFIRM',
+      [ConversationPhase.ERROR]:      '⚠️ ERROR',
+    };
+    return map[phase] || '⏹️ READY';
+  }, [phase]);
 
-  const selectedCommandMeta = useMemo(
-    () => COMMANDS.find((command) => command.key === selectedCommand),
-    [selectedCommand]
-  );
+  // Mid-conversation: just start mic without repeating the opening prompt.
+  // First time or fresh start: call begin (which speaks the intro then auto-listens).
+  const mainAction = isListening
+    ? onStop
+    : (hasMessages || isConfirming) ? onListen : onBegin;
 
-  const runCommand = async (commandText) => {
-    const cleanText = commandText.trim();
-    if (!cleanText || loading) return;
+  const mainLabel = isListening ? 'Stop listening'
+    : phase === ConversationPhase.BOOKING ? 'Booking…'
+    : isBusy ? 'Please wait…'
+    : hasMessages ? 'Tap to speak'
+    : 'Start voice booking';
 
-    setPartialTranscript('');
-    setTranscript(cleanText);
-    setSelectedCommand(resolveCommandKey(cleanText));
-    setLoading(true);
+  const currentStepLabel = useMemo(() => {
+    if (isComplete) return 'All details collected';
+    const next = SLOTS_IN_ORDER.find(({ slot }) => !slots[slot]);
+    return next ? `Step ${SLOTS_IN_ORDER.indexOf(next) + 1} of 4 — ${next.label}` : '';
+  }, [slots, isComplete]);
 
-    try {
-      const apiResponse = await fetchDummyCommandData(cleanText);
-      setSelectedCommand(apiResponse.commandKey);
-      setResponse(apiResponse);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleQuickCommand = (command) => {
-    runCommand(getCommandLabel(command, locale));
-  };
-
-  const renderHeader = () => (
-    <View style={styles.content}>
-      <Animated.View entering={FadeInDown.duration(350)} style={styles.voicePanel}>
-        <View style={styles.voiceHeader}>
-          <View style={styles.voiceIconBox}>
-            <Ionicons name="mic-outline" size={22} color={color.GREEN} />
-          </View>
-          <View style={styles.voiceTextBlock}>
-            <CustomText style={styles.panelTitle}>Speech Command Demo</CustomText>
-            <CustomText style={styles.panelSub}>{displayText}</CustomText>
-          </View>
-          <VoiceInputButton
-            size="lg"
-            onPartialResult={setPartialTranscript}
-            onResult={runCommand}
-            disabled={loading}
-          />
+  return (
+    <Animated.View entering={FadeInDown.duration(350)} style={styles.voicePanel}>
+      {/* Header row */}
+      <View style={styles.voiceHeader}>
+        <View style={styles.voiceIconBox}>
+          <Ionicons name="mic-outline" size={22} color={color.GREEN} />
         </View>
-
-        <View style={styles.commandRow}>
-          {COMMANDS.map((command) => (
-            <CommandChip
-              key={command.key}
-              command={command}
-              label={getCommandLabel(command, locale)}
-              selected={selectedCommand === command.key}
-              onPress={() => handleQuickCommand(command)}
-            />
-          ))}
-        </View>
-      </Animated.View>
-
-      {loading && (
-        <View style={styles.loadingCard}>
-          <ActivityIndicator size="small" color={color.GREEN} />
-          <CustomText style={styles.loadingText}>Fetching sample data</CustomText>
-        </View>
-      )}
-
-      {response && !loading && (
-        <Animated.View entering={FadeInDown.duration(300)} style={styles.responseHeader}>
-          <View>
-            <CustomText style={styles.responseTitle}>{response.data.title}</CustomText>
-            <CustomText style={styles.responseSub}>{response.data.summary}</CustomText>
+        <View style={styles.voiceTextBlock}>
+          <View style={styles.titleRow}>
+            <CustomText style={styles.panelTitle}>Farm Service Booking</CustomText>
+            <CustomText style={styles.indicator}>{indicator}</CustomText>
           </View>
-          {selectedCommandMeta ? (
-            <View style={styles.responseBadge}>
-              <MaterialCommunityIcons
-                name={selectedCommandMeta.icon}
-                size={14}
-                color={color.GREEN}
-              />
-              <CustomText style={styles.responseBadgeText}>{selectedCommandMeta.key}</CustomText>
-            </View>
+          <CustomText style={styles.panelSub}>{PHASE_LABELS[phase]}</CustomText>
+        </View>
+      </View>
+
+      <ListeningTimer isListening={isListening} />
+
+      {/* Buttons */}
+      <View style={styles.voiceActions}>
+        {/* Main mic / stop */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.actionButton, styles.primaryButton,
+            pressed && styles.buttonPressed,
+            isBusy && styles.buttonDisabled,
+          ]}
+          onPress={mainAction}
+          disabled={isBusy}
+        >
+          {phase === ConversationPhase.BOOKING
+            ? <ActivityIndicator size="small" color={color.WHITE} />
+            : <Ionicons name={isListening ? 'stop' : 'mic'} size={18} color={color.WHITE} />
+          }
+          <CustomText style={styles.buttonText}>{mainLabel}</CustomText>
+        </Pressable>
+
+        {/* CONFIRMING: Yes + No */}
+        {isConfirming && (
+          <>
+            <Pressable
+              style={({ pressed }) => [styles.actionButton, styles.confirmYes, pressed && styles.buttonPressed]}
+              onPress={onConfirm}
+            >
+              <Ionicons name="checkmark-circle-outline" size={18} color={color.WHITE} />
+              <CustomText style={styles.buttonText}>Yes, Confirm</CustomText>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [styles.actionButton, styles.confirmNo, pressed && styles.buttonPressed]}
+              onPress={onReset}
+            >
+              <Ionicons name="close-circle-outline" size={18} color={color.RED_REJECT} />
+              <CustomText style={[styles.secondaryButtonText, { color: color.RED_REJECT }]}>No, Cancel</CustomText>
+            </Pressable>
+          </>
+        )}
+
+        {/* Reset — only when not in confirming flow */}
+        {!isConfirming && hasMessages && (
+          <Pressable
+            style={({ pressed }) => [styles.actionButton, styles.secondaryButton, pressed && styles.buttonPressed]}
+            onPress={onReset}
+          >
+            <Ionicons name="refresh-outline" size={18} color={color.GREEN} />
+            <CustomText style={styles.secondaryButtonText}>Reset</CustomText>
+          </Pressable>
+        )}
+      </View>
+
+      {/* Step-by-step progress */}
+      <StepProgress slots={slots} isComplete={isComplete} />
+
+      {/* Error */}
+      {error ? (
+        <View style={styles.errorBox}>
+          <CustomText style={styles.errorTitle}>Error</CustomText>
+          <CustomText style={styles.errorText}>{error}</CustomText>
+        </View>
+      ) : null}
+
+      {/* Booking result */}
+      {bookingResult ? (
+        <View style={styles.resultBox}>
+          <CustomText style={styles.resultTitle}>
+            {bookingResult.message || 'Booking successful!'}
+          </CustomText>
+          {bookingResult.bookingId ? (
+            <CustomText style={styles.resultSub}>Booking ID: {bookingResult.bookingId}</CustomText>
           ) : null}
-        </Animated.View>
-      )}
-
-      {!response && !loading && (
-        <View style={styles.emptyState}>
-          <Ionicons name="list-outline" size={34} color={color.TEXT_MUTED} />
-          <CustomText style={styles.emptyTitle}>No data loaded</CustomText>
-          <CustomText style={styles.emptySub}>Try one of the sample commands above.</CustomText>
+          <View style={styles.resultPayload}>
+            <CustomText style={styles.payloadText}>{JSON.stringify(bookingResult, null, 2)}</CustomText>
+          </View>
         </View>
-      )}
+      ) : null}
+
+      {/* Conversation section header */}
+      <View style={styles.chatHeader}>
+        <CustomText style={styles.chatTitle}>Conversation</CustomText>
+        <CustomText style={styles.chatSubtitle}>{currentStepLabel}</CustomText>
+      </View>
+    </Animated.View>
+  );
+});
+
+// ─── Typed text input bar ─────────────────────────────────────────────────────
+const TextInputBar = memo(function TextInputBar({ onSend, disabled }) {
+  const [text, setText] = useState('');
+
+  const handleSend = useCallback(() => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    onSend(trimmed);
+    setText('');
+  }, [text, onSend]);
+
+  return (
+    <View style={styles.inputBar}>
+      <TextInput
+        style={styles.textInput}
+        value={text}
+        onChangeText={setText}
+        placeholder="Type your response…"
+        placeholderTextColor={color.TEXT_MUTED}
+        editable={!disabled}
+        returnKeyType="send"
+        onSubmitEditing={handleSend}
+        blurOnSubmit={false}
+        multiline={false}
+      />
+      <Pressable
+        onPress={handleSend}
+        disabled={disabled || !text.trim()}
+        style={({ pressed }) => [
+          styles.sendButton,
+          (disabled || !text.trim()) && styles.sendButtonDisabled,
+          pressed && styles.buttonPressed,
+        ]}
+      >
+        <Ionicons name="send" size={18} color={color.WHITE} />
+      </Pressable>
     </View>
   );
+});
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
+export default function SpeechCommandDemoScreen({ navigation }) {
+  const flatListRef = useRef(null);
+
+  const {
+    phase,
+    slots,
+    messages,
+    partialTranscript,
+    error,
+    bookingResult,
+    isComplete,
+    begin,
+    listen,
+    stop,
+    reset,
+    confirm,
+    sendText,
+  } = useConversationalBooking();
+
+  const hasMessages = messages.length > 0;
+
+  // Disable text input while AI is speaking/thinking/booking/mic is live
+  const inputDisabled = phase === ConversationPhase.SPEAKING
+    || phase === ConversationPhase.THINKING
+    || phase === ConversationPhase.BOOKING
+    || phase === ConversationPhase.LISTENING;
+
+  // Merge real messages + live partial transcript bubble at the tail
+  const listData = useMemo(() => {
+    if (!partialTranscript) return messages;
+    return [...messages, { id: '__partial__', role: 'farmer', text: partialTranscript }];
+  }, [messages, partialTranscript]);
+
+  const scrollToBottom = useCallback(() => {
+    flatListRef.current?.scrollToEnd({ animated: true });
+  }, []);
+
+  useEffect(() => { scrollToBottom(); }, [messages.length, partialTranscript, scrollToBottom]);
+
+  const renderItem = useCallback(
+    ({ item }) => <MessageBubble item={item} isPartial={item.id === '__partial__'} />,
+    [],
+  );
+
+  const keyExtractor = useCallback((item) => item.id, []);
 
   return (
     <View style={styles.root}>
       <StatusBar style="dark" />
-      <InnerScreenHeader navigation={navigation} title="Speech Demo" />
+      <InnerScreenHeader navigation={navigation} title="Voice Booking" />
 
-      <FlatList
-        data={response?.data.items ?? []}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => <ResultItem item={item} index={index} />}
-        ListHeaderComponent={renderHeader}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-      />
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+      >
+        {/* Fixed voice control panel — does not scroll */}
+        <View style={styles.panelContainer}>
+          <VoicePanel
+            phase={phase}
+            slots={slots}
+            isComplete={isComplete}
+            error={error}
+            bookingResult={bookingResult}
+            hasMessages={hasMessages}
+            onBegin={begin}
+            onListen={listen}
+            onStop={stop}
+            onReset={reset}
+            onConfirm={confirm}
+          />
+        </View>
+
+        {/* Only the chat messages scroll */}
+        <FlatList
+          ref={flatListRef}
+          data={listData}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Ionicons name="chatbubbles-outline" size={32} color={color.TEXT_MUTED} />
+              <CustomText style={styles.emptyTitle}>No conversation yet</CustomText>
+              <CustomText style={styles.emptySub}>
+                Tap the mic or type below to start your booking.
+              </CustomText>
+            </View>
+          }
+          showsVerticalScrollIndicator={false}
+          removeClippedSubviews={false}
+          windowSize={5}
+          initialNumToRender={8}
+          maxToRenderPerBatch={4}
+          updateCellsBatchingPeriod={50}
+          onContentSizeChange={scrollToBottom}
+        />
+
+        <TextInputBar onSend={sendText} disabled={inputDisabled} />
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -408,16 +425,27 @@ const styles = StyleSheet.create({
     backgroundColor: color.SURFACE,
   },
 
+  flex: {
+    flex: 1,
+  },
+
+  panelContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: color.BORDER_LIGHT,
+    backgroundColor: color.SURFACE,
+  },
+
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 32,
-    gap: 10,
+    paddingTop: 12,
+    paddingBottom: 12,
+    gap: 16,
   },
 
-  content: {
-    gap: 14,
-  },
-
+  // ─── Voice panel ────────────────────────────────────────────────────────────
   voicePanel: {
     backgroundColor: color.WHITE,
     borderRadius: 18,
@@ -449,12 +477,27 @@ const styles = StyleSheet.create({
 
   voiceTextBlock: {
     flex: 1,
-    gap: 3,
+    gap: 4,
+  },
+
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 
   panelTitle: {
     ...globalStyles.f14Bold,
     color: color.TEXT_MAIN,
+  },
+
+  indicator: {
+    ...globalStyles.f11Bold,
+    color: color.GREEN,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    backgroundColor: color.GREEN_BG,
   },
 
   panelSub: {
@@ -463,94 +506,275 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 
-  commandRow: {
+  // ─── Progress bar ───────────────────────────────────────────────────────────
+  listeningBar: {
+    height: 4,
+    backgroundColor: color.BORDER_LIGHT,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+
+  listeningProgress: {
+    height: '100%',
+    backgroundColor: color.GREEN,
+    borderRadius: 2,
+  },
+
+  // ─── Buttons ────────────────────────────────────────────────────────────────
+  voiceActions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-  },
-
-  commandChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    borderRadius: 99,
-    borderWidth: 1,
-    borderColor: color.BORDER_GREEN,
-    backgroundColor: color.GREEN_BG,
-  },
-
-  commandChipActive: {
-    backgroundColor: color.GREEN,
-    borderColor: color.GREEN,
-  },
-
-  commandChipText: {
-    ...globalStyles.f10Bold,
-    color: color.GREEN,
-  },
-
-  commandChipTextActive: {
-    color: color.WHITE,
-  },
-
-  loadingCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: 10,
-    backgroundColor: color.WHITE,
+  },
+
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
     borderRadius: 14,
-    padding: 14,
     borderWidth: 1,
     borderColor: color.BORDER_LIGHT,
   },
 
-  loadingText: {
+  primaryButton: {
+    backgroundColor: color.GREEN,
+    borderColor: color.GREEN,
+  },
+
+  secondaryButton: {
+    backgroundColor: color.WHITE,
+    borderColor: color.GREEN,
+  },
+
+  confirmYes: {
+    backgroundColor: color.GREEN,
+    borderColor: color.GREEN,
+  },
+
+  confirmNo: {
+    backgroundColor: color.WHITE,
+    borderColor: color.RED_REJECT,
+  },
+
+  buttonText: {
     ...globalStyles.f12Bold,
-    color: color.TEXT_SUB,
+    color: color.WHITE,
   },
 
-  responseHeader: {
+  secondaryButtonText: {
+    ...globalStyles.f12Bold,
+    color: color.GREEN,
+  },
+
+  buttonPressed: {
+    opacity: 0.75,
+  },
+
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+
+  // ─── Step progress ───────────────────────────────────────────────────────────
+  stepRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    paddingHorizontal: 2,
+    alignItems: 'flex-start',
   },
 
-  responseTitle: {
-    ...globalStyles.f16Bold,
+  stepItem: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+  },
+
+  stepCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: color.SURFACE_LOW,
+    borderWidth: 1.5,
+    borderColor: color.BORDER_LIGHT,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  stepCircleDone: {
+    backgroundColor: color.GREEN,
+    borderColor: color.GREEN,
+  },
+
+  stepCircleCurrent: {
+    borderColor: color.GREEN,
+    backgroundColor: color.GREEN_BG,
+  },
+
+  stepNum: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: color.TEXT_MUTED,
+  },
+
+  stepNumCurrent: {
+    color: color.GREEN,
+  },
+
+  stepConnector: {
+    height: 1.5,
+    flex: 0.6,
+    marginTop: 11,
+    backgroundColor: color.BORDER_LIGHT,
+  },
+
+  stepConnectorFilled: {
+    backgroundColor: color.GREEN,
+  },
+
+  stepLabel: {
+    ...globalStyles.f10Regular,
+    color: color.TEXT_MUTED,
+    textAlign: 'center',
+  },
+
+  stepLabelDone: {
+    color: color.GREEN,
+  },
+
+  stepLabelCurrent: {
+    color: color.GREEN,
+    fontWeight: '600',
+  },
+
+  stepValue: {
+    ...globalStyles.f10Regular,
+    color: color.TEXT_MUTED,
+    textAlign: 'center',
+    maxWidth: 60,
+  },
+
+  // ─── Error & result ─────────────────────────────────────────────────────────
+  errorBox: {
+    backgroundColor: color.RED_BG,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: color.RED_REJECT,
+    padding: 12,
+  },
+
+  errorTitle: {
+    ...globalStyles.f12Bold,
+    color: color.RED_REJECT,
+    marginBottom: 4,
+  },
+
+  errorText: {
+    ...globalStyles.f12Regular,
+    color: color.RED_REJECT,
+  },
+
+  resultBox: {
+    backgroundColor: color.GREEN_BG,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: color.GREEN,
+    padding: 12,
+    gap: 4,
+  },
+
+  resultTitle: {
+    ...globalStyles.f12Bold,
     color: color.TEXT_MAIN,
   },
 
-  responseSub: {
+  resultSub: {
     ...globalStyles.f12Regular,
+    color: color.TEXT_SUB,
+  },
+
+  resultPayload: {
+    backgroundColor: color.WHITE,
+    borderRadius: 12,
+    padding: 10,
+    marginTop: 6,
+  },
+
+  payloadText: {
+    ...globalStyles.f10Regular,
     color: color.TEXT_MUTED,
-    marginTop: 2,
+    lineHeight: 18,
   },
 
-  responseBadge: {
+  // ─── Conversation header ────────────────────────────────────────────────────
+  chatHeader: {
+    gap: 4,
+    paddingTop: 4,
+  },
+
+  chatTitle: {
+    ...globalStyles.f14Bold,
+    color: color.TEXT_MAIN,
+  },
+
+  chatSubtitle: {
+    ...globalStyles.f12Regular,
+    color: color.TEXT_SUB,
+  },
+
+  // ─── Message bubbles ────────────────────────────────────────────────────────
+  messageRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: color.GREEN_BG,
-    borderRadius: 99,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    width: '100%',
   },
 
-  responseBadgeText: {
-    ...globalStyles.f10Bold,
-    color: color.GREEN,
-    textTransform: 'capitalize',
+  messageRowFarmer: {
+    justifyContent: 'flex-end',
   },
 
+  messageRowAssistant: {
+    justifyContent: 'flex-start',
+  },
+
+  messageBubble: {
+    maxWidth: '80%',
+    padding: 12,
+    borderRadius: 18,
+  },
+
+  messageBubbleFarmer: {
+    backgroundColor: color.GREEN,
+    borderBottomRightRadius: 4,
+  },
+
+  messageBubbleAssistant: {
+    backgroundColor: color.WHITE,
+    borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: color.BORDER_LIGHT,
+  },
+
+  messageBubblePartial: {
+    opacity: 0.6,
+  },
+
+  messageText: {
+    ...globalStyles.f12Regular,
+    lineHeight: 18,
+  },
+
+  messageTextFarmer: {
+    color: color.WHITE,
+  },
+
+  messageTextAssistant: {
+    color: color.TEXT_MAIN,
+  },
+
+  // ─── Empty state ────────────────────────────────────────────────────────────
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 44,
-    gap: 8,
+    paddingVertical: 32,
+    gap: 10,
   },
 
   emptyTitle: {
@@ -564,81 +788,40 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  resultItem: {
+  // ─── Text input bar ─────────────────────────────────────────────────────────
+  inputBar: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: color.BORDER_LIGHT,
     backgroundColor: color.WHITE,
-    borderRadius: 14,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: color.BORDER_LIGHT,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
   },
 
-  resultIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: color.GREEN_BG,
+  textInput: {
+    flex: 1,
+    ...globalStyles.f14Regular,
+    color: color.TEXT_MAIN,
+    backgroundColor: color.SURFACE,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: color.BORDER_LIGHT,
+  },
+
+  sendButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: color.GREEN,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
-  resultBody: {
-    flex: 1,
-    gap: 5,
-  },
-
-  resultTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 10,
-  },
-
-  resultTitle: {
-    ...globalStyles.f12Bold,
-    color: color.TEXT_MAIN,
-    flex: 1,
-  },
-
-  resultAmount: {
-    ...globalStyles.f12Bold,
-    color: color.GREEN,
-  },
-
-  resultSub: {
-    ...globalStyles.f12Regular,
-    color: color.TEXT_SUB,
-  },
-
-  resultMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-  },
-
-  resultMeta: {
-    ...globalStyles.f10Regular,
-    color: color.TEXT_MUTED,
-    flex: 1,
-  },
-
-  statusPill: {
-    backgroundColor: color.SURFACE_LOW,
-    borderRadius: 99,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-
-  statusText: {
-    ...globalStyles.f10Bold,
-    color: color.TEXT_SUB,
+  sendButtonDisabled: {
+    backgroundColor: color.BORDER_LIGHT,
   },
 });
