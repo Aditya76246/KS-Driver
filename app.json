@@ -35,7 +35,8 @@
           "microphonePermission": "Allow KisanSahakar to use the microphone for voice input",
           "speechRecognitionPermission": "Allow KisanSahakar to use speech recognition"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "extra": {
       "eas": {

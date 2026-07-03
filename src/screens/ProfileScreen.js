@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
@@ -80,7 +81,8 @@ function MenuItem({ item, onPress, isLast }) {
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function ProfileScreen({ navigation }) {
-  const { userRole, user } = useAuth();
+  const { userRole, user, logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const completionPct = 66;
 
   const handleMenuPress = (id) => {
@@ -91,11 +93,14 @@ export default function ProfileScreen({ navigation }) {
     navigation.navigate(item.id, item.params);
   };
 
-  const handleLogout = () => {
-    navigation.getParent()?.getParent()?.reset({
-      index: 0,
-      routes: [{ name: 'Auth' }],
-    });
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await logout();
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -206,9 +211,13 @@ export default function ProfileScreen({ navigation }) {
 
         {/* ── Logout ── */}
         <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-          <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
-            <Ionicons name="log-out-outline" size={20} color={color.RED_REJECT} />
-            <CustomText style={styles.logoutText}>Logout</CustomText>
+          <TouchableOpacity style={[styles.logoutBtn, isLoggingOut && styles.logoutBtnDisabled]} onPress={handleLogout} activeOpacity={0.8} disabled={isLoggingOut}>
+            {isLoggingOut ? (
+              <ActivityIndicator size="small" color={color.RED_REJECT} style={styles.logoutLoader} />
+            ) : (
+              <Ionicons name="log-out-outline" size={20} color={color.RED_REJECT} />
+            )}
+            <CustomText style={styles.logoutText}>{isLoggingOut ? 'Logging out...' : 'Logout'}</CustomText>
           </TouchableOpacity>
         </Animated.View>
 
@@ -464,6 +473,12 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: color.BORDER_RED,
     paddingVertical: 16,
+  },
+  logoutBtnDisabled: {
+    opacity: 0.65,
+  },
+  logoutLoader: {
+    marginRight: 8,
   },
   logoutText: {
     ...globalStyles.f14Bold,
