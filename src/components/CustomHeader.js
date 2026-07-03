@@ -104,7 +104,7 @@ export default function CustomHeader({
 
         {/* Left — copy stack */}
         <View style={styles.copy}>
-
+ 
           {/* Location row */}
           <Pressable
             onPress={onLocationPress}
