@@ -22,18 +22,18 @@ import { color } from '../../styles/theme';
 
 const TOTAL_STEPS = 2;
 
-const GENDER_OPTIONS    = ['Male', 'Female', 'Other', 'Prefer not to say'];
-const WORK_TYPES        = ['Paddy Transplanting', 'Weed Removal', 'Manual Harvesting', 'Irrigation Work', 'Spraying', 'Sowing', 'Threshing', 'Land Preparation'];
+const GENDER_OPTIONS = ['Male', 'Female', 'Other', 'Prefer not to say'];
+const WORK_TYPES = ['Paddy Transplanting', 'Weed Removal', 'Manual Harvesting', 'Irrigation Work', 'Spraying', 'Sowing', 'Threshing', 'Land Preparation'];
 const EXPERIENCE_OPTIONS = ['Less than 1 year', '1–3 years', '3–5 years', '5–10 years', '10+ years'];
-const BANK_OPTIONS      = [
+const BANK_OPTIONS = [
   'State Bank of India', 'Punjab National Bank', 'Bank of Baroda',
   'Canara Bank', 'HDFC Bank', 'ICICI Bank', 'Axis Bank',
   'Kotak Mahindra Bank', 'Union Bank', 'IDBI Bank',
 ];
 
 const STEP_META = [
-  { label: 'Personal', icon: 'person-outline'  },
-  { label: 'Bank',     icon: 'business-outline' },
+  { label: 'Personal', icon: 'person-outline' },
+  { label: 'Bank', icon: 'business-outline' },
 ];
 
 // ─── Step Indicator ───────────────────────────────────────────────────────────
@@ -41,7 +41,7 @@ function StepIndicator({ current }) {
   return (
     <View style={styles.stepIndicatorRow}>
       {STEP_META.map((s, i) => {
-        const isDone   = i < current - 1;
+        const isDone = i < current - 1;
         const isActive = i === current - 1;
         return (
           <React.Fragment key={i}>
@@ -187,7 +187,7 @@ function Step1({ data, onChange }) {
         </CustomText>
       </View>
 
-      <AvatarUpload onPress={() => {}} />
+      <AvatarUpload onPress={() => { }} />
 
       <View style={styles.formCard}>
         <VoiceTextInput
@@ -333,7 +333,7 @@ function Step2({ data, onChange }) {
               placeholderTextColor={color.TEXT_MUTED}
               keyboardType="number-pad"
             />
-            {match    && <Ionicons name="checkmark-circle" size={18} color={color.GREEN} />}
+            {match && <Ionicons name="checkmark-circle" size={18} color={color.GREEN} />}
             {mismatch && <Ionicons name="close-circle" size={18} color="#c62828" />}
           </View>
           {mismatch && (
@@ -365,7 +365,7 @@ function Step2({ data, onChange }) {
         />
       </View>
 
-      <View style={styles.dividerRow}>
+      {/* <View style={styles.dividerRow}>
         <View style={styles.dividerLine} />
         <CustomText style={styles.dividerText}>or link UPI instead</CustomText>
         <View style={styles.dividerLine} />
@@ -380,7 +380,7 @@ function Step2({ data, onChange }) {
           <CustomText style={styles.upiBtnSub}>Instant payouts via PhonePe / GPay / Paytm</CustomText>
         </View>
         <Ionicons name="chevron-forward" size={16} color={color.TEXT_MUTED} />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </Animated.View>
   );
 }
@@ -406,9 +406,9 @@ export default function GigPersonalInfoScreen({ navigation }) {
     currentStep === 1
       ? step1.fullName.trim().length > 0 && step1.mobile.trim().length > 0 && step1.workTypes.length > 0
       : step2.holderName.trim().length > 0 &&
-        step2.accountNumber.trim().length > 0 &&
-        step2.accountNumber === step2.confirmAccount &&
-        step2.ifsc.trim().length >= 11;
+      step2.accountNumber.trim().length > 0 &&
+      step2.accountNumber === step2.confirmAccount &&
+      step2.ifsc.trim().length >= 11;
 
   const handleNext = () => {
     if (!canProceed) return;
@@ -470,8 +470,8 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.SURFACE },
 
   stepIndicatorWrapper: { paddingHorizontal: 24, paddingBottom: 16 },
-  stepIndicatorRow:     { flexDirection: 'row', alignItems: 'flex-start' },
-  stepNode:             { alignItems: 'center', gap: 6, width: 72 },
+  stepIndicatorRow: { flexDirection: 'row', alignItems: 'flex-start' },
+  stepNode: { alignItems: 'center', gap: 6, width: 72 },
   stepCircle: {
     width: 38, height: 38, borderRadius: 19,
     backgroundColor: color.AVATAR_BG,
@@ -479,22 +479,22 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: color.BORDER_LIGHT,
   },
   stepCircleActive: { backgroundColor: color.GREEN, borderColor: color.GREEN },
-  stepCircleDone:   { backgroundColor: color.GREEN, borderColor: color.GREEN },
-  stepNodeLabel:        { ...globalStyles.f10Regular, color: color.TEXT_MUTED, textAlign: 'center' },
-  stepNodeLabelActive:  { ...globalStyles.f10Bold,    color: color.GREEN },
-  stepConnector:        { flex: 1, paddingTop: 18, paddingHorizontal: 2 },
-  stepLine:             { height: 2, borderRadius: 99, backgroundColor: color.BORDER_LIGHT },
-  stepLineDone:         { backgroundColor: color.GREEN },
+  stepCircleDone: { backgroundColor: color.GREEN, borderColor: color.GREEN },
+  stepNodeLabel: { ...globalStyles.f10Regular, color: color.TEXT_MUTED, textAlign: 'center' },
+  stepNodeLabelActive: { ...globalStyles.f10Bold, color: color.GREEN },
+  stepConnector: { flex: 1, paddingTop: 18, paddingHorizontal: 2 },
+  stepLine: { height: 2, borderRadius: 99, backgroundColor: color.BORDER_LIGHT },
+  stepLineDone: { backgroundColor: color.GREEN },
 
   scrollContent: { paddingHorizontal: 20, paddingBottom: 20 },
-  stepContent:   { gap: 20 },
+  stepContent: { gap: 20 },
 
-  titleBlock:   { gap: 6 },
-  pageTitle:    { ...globalStyles.f16Bold,    color: color.TEXT_MAIN, lineHeight: 28 },
-  pageSubtitle: { ...globalStyles.f12Regular, color: color.TEXT_SUB,  lineHeight: 20 },
+  titleBlock: { gap: 6 },
+  pageTitle: { ...globalStyles.f16Bold, color: color.TEXT_MAIN, lineHeight: 28 },
+  pageSubtitle: { ...globalStyles.f12Regular, color: color.TEXT_SUB, lineHeight: 20 },
 
-  avatarSection:          { alignItems: 'center', gap: 10 },
-  avatarContainer:        { position: 'relative' },
+  avatarSection: { alignItems: 'center', gap: 10 },
+  avatarContainer: { position: 'relative' },
   avatarImagePlaceholder: {
     width: 100, height: 100, borderRadius: 50,
     backgroundColor: color.SURFACE_LOW,
@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
     borderWidth: 2, borderColor: color.WHITE,
   },
-  uploadPhotoBtn:  { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  uploadPhotoBtn: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   uploadPhotoText: { ...globalStyles.f12Bold, color: color.GREEN },
 
   formCard: {
@@ -527,26 +527,26 @@ const styles = StyleSheet.create({
   },
   cardSectionTitle: { ...globalStyles.f12Bold, color: color.GREEN },
 
-  fieldGroup:  { gap: 8 },
-  fieldLabel:  { ...globalStyles.f12Bold, color: color.TEXT_MAIN },
-  fieldHint:   { ...globalStyles.f10Regular, color: color.TEXT_MUTED, lineHeight: 16 },
+  fieldGroup: { gap: 8 },
+  fieldLabel: { ...globalStyles.f12Bold, color: color.TEXT_MAIN },
+  fieldHint: { ...globalStyles.f10Regular, color: color.TEXT_MUTED, lineHeight: 16 },
   inputBox: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: color.SURFACE_LOW,
     borderRadius: 12, borderWidth: 1.5, borderColor: color.BORDER_LIGHT,
     height: 52, paddingHorizontal: 14,
   },
-  inputBoxFocused: { borderColor: color.GREEN,  backgroundColor: color.WHITE  },
-  inputBoxError:   { borderColor: '#ef9a9a',    backgroundColor: '#fff8f8'    },
-  inputBoxMatch:   { borderColor: color.GREEN,  backgroundColor: '#f6ffed'    },
-  inputIcon:       { marginRight: 10 },
-  input:           { flex: 1, ...globalStyles.f12Regular, color: color.TEXT_MAIN, padding: 0 },
-  dropdownValue:   { ...globalStyles.f12Regular, color: color.TEXT_MAIN, flex: 1 },
+  inputBoxFocused: { borderColor: color.GREEN, backgroundColor: color.WHITE },
+  inputBoxError: { borderColor: '#ef9a9a', backgroundColor: '#fff8f8' },
+  inputBoxMatch: { borderColor: color.GREEN, backgroundColor: '#f6ffed' },
+  inputIcon: { marginRight: 10 },
+  input: { flex: 1, ...globalStyles.f12Regular, color: color.TEXT_MAIN, padding: 0 },
+  dropdownValue: { ...globalStyles.f12Regular, color: color.TEXT_MAIN, flex: 1 },
 
-  inlineError:     { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: -2 },
+  inlineError: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: -2 },
   inlineErrorText: { ...globalStyles.f10Regular, color: '#c62828' },
 
-  rowFields:    { flexDirection: 'row', gap: 12 },
+  rowFields: { flexDirection: 'row', gap: 12 },
   rowFieldHalf: { flex: 1 },
 
   chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -556,9 +556,9 @@ const styles = StyleSheet.create({
     borderRadius: 30, borderWidth: 1.5,
     borderColor: color.BORDER_LIGHT, backgroundColor: color.SURFACE_LOW,
   },
-  chipActive:     { backgroundColor: color.GREEN_BG, borderColor: color.GREEN },
-  chipText:       { ...globalStyles.f12Regular, color: color.TEXT_SUB  },
-  chipTextActive: { ...globalStyles.f12Bold,    color: color.GREEN     },
+  chipActive: { backgroundColor: color.GREEN_BG, borderColor: color.GREEN },
+  chipText: { ...globalStyles.f12Regular, color: color.TEXT_SUB },
+  chipTextActive: { ...globalStyles.f12Bold, color: color.GREEN },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   dropdownSheet: {
@@ -570,11 +570,11 @@ const styles = StyleSheet.create({
     width: 40, height: 4, borderRadius: 99,
     backgroundColor: color.BORDER_LIGHT, alignSelf: 'center', marginBottom: 12,
   },
-  dropdownSheetTitle:       { ...globalStyles.f14Bold,    color: color.TEXT_MAIN, marginBottom: 8 },
-  dropdownOption:           { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, paddingHorizontal: 12, borderRadius: 12 },
-  dropdownOptionActive:     { backgroundColor: color.GREEN_BG },
-  dropdownOptionText:       { ...globalStyles.f14Regular, color: color.TEXT_MAIN },
-  dropdownOptionTextActive: { ...globalStyles.f14Bold,    color: color.GREEN     },
+  dropdownSheetTitle: { ...globalStyles.f14Bold, color: color.TEXT_MAIN, marginBottom: 8 },
+  dropdownOption: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, paddingHorizontal: 12, borderRadius: 12 },
+  dropdownOptionActive: { backgroundColor: color.GREEN_BG },
+  dropdownOptionText: { ...globalStyles.f14Regular, color: color.TEXT_MAIN },
+  dropdownOptionTextActive: { ...globalStyles.f14Bold, color: color.GREEN },
 
   infoBanner: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10,
@@ -583,7 +583,7 @@ const styles = StyleSheet.create({
   },
   infoBannerText: { ...globalStyles.f12Regular, color: color.GREEN_DARK, flex: 1, lineHeight: 18 },
 
-  dividerRow:  { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 },
   dividerLine: { flex: 1, height: 1, backgroundColor: color.BORDER_LIGHT },
   dividerText: { ...globalStyles.f12Regular, color: color.TEXT_MUTED },
 
@@ -598,8 +598,8 @@ const styles = StyleSheet.create({
     backgroundColor: color.GREEN_BG,
     justifyContent: 'center', alignItems: 'center',
   },
-  upiBtnTitle: { ...globalStyles.f14Bold,    color: color.GREEN       },
-  upiBtnSub:   { ...globalStyles.f10Regular, color: color.TEXT_MUTED, marginTop: 2 },
+  upiBtnTitle: { ...globalStyles.f14Bold, color: color.GREEN },
+  upiBtnSub: { ...globalStyles.f10Regular, color: color.TEXT_MUTED, marginTop: 2 },
 
   bottomBar: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
@@ -613,6 +613,6 @@ const styles = StyleSheet.create({
     backgroundColor: color.GREEN, borderRadius: 99, paddingVertical: 16,
   },
   saveBtnDisabled: { backgroundColor: color.AVATAR_BG },
-  saveBtnText:     { ...globalStyles.f14Bold,    color: color.WHITE       },
-  stepCounter:     { ...globalStyles.f12Regular, color: color.TEXT_MUTED, textAlign: 'center' },
+  saveBtnText: { ...globalStyles.f14Bold, color: color.WHITE },
+  stepCounter: { ...globalStyles.f12Regular, color: color.TEXT_MUTED, textAlign: 'center' },
 });

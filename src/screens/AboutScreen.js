@@ -269,7 +269,7 @@ export default function AboutScreen({ navigation }) {
             Made with ❤️ for the farmers of India
           </CustomText>
           <CustomText style={styles.footerSub}>
-            © 2024 Kisan Sahakar Technologies Pvt. Ltd. All rights reserved.
+            © 2026 Glansa Solutions - Kisan Sahakar Technologies Pvt. Ltd. All rights reserved.
           </CustomText>
         </Animated.View>
 

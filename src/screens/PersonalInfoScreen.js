@@ -489,7 +489,7 @@ function Step3({ data, onChange }) {
         />
       </View>
 
-      <View style={styles.dividerRow}>
+      {/* <View style={styles.dividerRow}>
         <View style={styles.dividerLine} />
         <CustomText style={styles.dividerText}>or link UPI instead</CustomText>
         <View style={styles.dividerLine} />
@@ -504,7 +504,7 @@ function Step3({ data, onChange }) {
           <CustomText style={styles.upiBtnSub}>Instant payouts via PhonePe / GPay / Paytm</CustomText>
         </View>
         <Ionicons name="chevron-forward" size={16} color={color.TEXT_MUTED} />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </Animated.View>
   );
 }
