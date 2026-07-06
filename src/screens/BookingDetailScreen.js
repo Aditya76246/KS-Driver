@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   Image,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
@@ -22,6 +21,7 @@ import CustomText from '../components/CustomText';
 import globalStyles from '../styles/globalStyles';
 import { color } from '../styles/theme';
 import { openGoogleMapsNav } from './JobNavigationScreen';
+import { showAlert } from '../services/alertService';
 
 // ─── Placeholder hero image (swap with real image from API) ──────────────────
 // Replace this URI with: { uri: booking.imageUrl } once API is ready
@@ -139,7 +139,7 @@ export default function BookingDetailScreen({ navigation, route }) {
   };
 
   const handleAccept = () => {
-    Alert.alert('Accept Booking', `Accept job from ${booking.farmerName}?`, [
+    showAlert('Accept Booking', `Accept job from ${booking.farmerName}?`, [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Accept',
@@ -152,7 +152,7 @@ export default function BookingDetailScreen({ navigation, route }) {
   };
 
   const handleReject = () => {
-    Alert.alert('Reject Booking', 'Are you sure you want to reject this booking?', [
+    showAlert('Reject Booking', 'Are you sure you want to reject this booking?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Reject',

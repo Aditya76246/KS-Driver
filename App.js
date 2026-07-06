@@ -4,6 +4,8 @@ import { useFonts } from 'expo-font';
 import AppNavigator from './src/navigations/AppNavigator';
 import { LanguageProvider } from './src/context/LanguageContext';
 import { AuthProvider } from './src/context/AuthContext';
+import CustomAlert from './src/components/CustomAlert';
+import { alertRef } from './src/services/alertService';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -24,6 +26,7 @@ export default function App() {
     <AuthProvider>
       <LanguageProvider>
         <AppNavigator />
+        <CustomAlert ref={alertRef} />
       </LanguageProvider>
     </AuthProvider>
   );}

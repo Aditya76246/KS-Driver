@@ -3,16 +3,16 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { AuthContext } from '../context/AuthContext';
 
-import ProfileScreen         from '../screens/ProfileScreen';
-import PersonalInfoScreen    from '../screens/PersonalInfoScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import PersonalInfoScreen from '../screens/PersonalInfoScreen';
 import GigPersonalInfoScreen from '../screens/gigWorker/GigPersonalInfoScreen';
-import DocumentsScreen       from '../screens/DocumentsScreen';
-import TermsScreen           from '../screens/TermsScreen';
-import PrivacyPolicyScreen   from '../screens/PrivacyPolicyScreen';
-import HelpSupportScreen     from '../screens/HelpSupportScreen';
-import AboutScreen           from '../screens/AboutScreen';
+import DocumentsScreen from '../screens/DocumentsScreen';
+import TermsScreen from '../screens/TermsScreen';
+import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
+import HelpSupportScreen from '../screens/HelpSupportScreen';
+import AboutScreen from '../screens/AboutScreen';
 import SpeechCommandDemoScreen from '../screens/SpeechCommandDemoScreen';
-import ChooseLanguage        from '../components/ChooseLanguage';
+import ChooseLanguage from '../components/ChooseLanguage';
 
 const Stack = createStackNavigator();
 

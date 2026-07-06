@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Linking,
-  Alert,
   TextInput,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -17,6 +16,7 @@ import InnerScreenHeader from '../components/InnerScreenHeader';
 import VoiceInputButton from '../components/VoiceInputButton'; 
 import globalStyles from '../styles/globalStyles';
 import { color } from '../styles/theme';
+import { showAlert } from '../services/alertService';
 
 // ─── Data (unchanged) ─────────────────────────────────────────────────────────
 
@@ -178,7 +178,7 @@ export default function HelpSupportScreen({ navigation }) {
   );
 
   const handleSubmitTicket = () => {
-    Alert.alert(
+    showAlert(
       'Support Request Sent',
       'Our team will get back to you within 24 hours on your registered mobile number.',
       [{ text: 'OK', onPress: () => setTicketText('') }]
