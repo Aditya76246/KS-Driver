@@ -17,6 +17,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import CustomText from '../../components/CustomText';
 import InnerScreenHeader from '../../components/InnerScreenHeader';
 import VoiceTextInput from '../../components/VoiceTextInput';
+import LocationPicker, { EMPTY_LOCATION } from '../../components/LocationPicker';
 import globalStyles from '../../styles/globalStyles';
 import { color } from '../../styles/theme';
 
@@ -232,13 +233,18 @@ function Step1({ data, onChange }) {
           voiceEnabled={false}
         />
 
-        <VoiceTextInput
-          label="Address (Village / District)"
-          value={data.address}
-          onChangeText={(v) => onChange('address', v)}
-          placeholder="e.g. Kandukur, Nellore"
-          icon="location-outline"
-          hint="Speak your village and district name"
+      </View>
+
+      <View style={styles.formCard}>
+        <View style={styles.cardSectionHeader}>
+          <View style={styles.cardSectionIconBox}>
+            <Ionicons name="location-outline" size={16} color={color.GREEN} />
+          </View>
+          <CustomText style={styles.cardSectionTitle}>Location</CustomText>
+        </View>
+        <LocationPicker
+          value={data.location}
+          onChange={(v) => onChange('location', v)}
         />
       </View>
 
@@ -393,7 +399,7 @@ export default function GigPersonalInfoScreen({ navigation }) {
 
   const [step1, setStep1] = useState({
     photoUri: null, fullName: '', gender: '', age: '', mobile: '',
-    address: '', workTypes: [], experience: '',
+    location: EMPTY_LOCATION, workTypes: [], experience: '',
   });
   const [step2, setStep2] = useState({
     holderName: '', accountNumber: '', confirmAccount: '', ifsc: '', bankName: '',
@@ -404,7 +410,11 @@ export default function GigPersonalInfoScreen({ navigation }) {
 
   const canProceed =
     currentStep === 1
-      ? step1.fullName.trim().length > 0 && step1.mobile.trim().length > 0 && step1.workTypes.length > 0
+      ? step1.fullName.trim().length > 0 &&
+        step1.mobile.trim().length > 0 &&
+        step1.workTypes.length > 0 &&
+        !!step1.location.stateId &&
+        !!step1.location.districtId
       : step2.holderName.trim().length > 0 &&
       step2.accountNumber.trim().length > 0 &&
       step2.accountNumber === step2.confirmAccount &&

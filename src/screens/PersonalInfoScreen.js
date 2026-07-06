@@ -17,6 +17,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import CustomText from '../components/CustomText';
 import InnerScreenHeader from '../components/InnerScreenHeader';
 import VoiceTextInput from '../components/VoiceTextInput';
+import LocationPicker, { EMPTY_LOCATION } from '../components/LocationPicker';
 import globalStyles from '../styles/globalStyles';
 import { color } from '../styles/theme';
 
@@ -245,14 +246,13 @@ function Step1({ data, onChange }) {
           voiceEnabled={false}
         />
 
-        {/* Address — voice very useful here */}
-        <VoiceTextInput
-          label="Address (Village / District)"
-          value={data.address}
-          onChangeText={(v) => onChange('address', v)}
-          placeholder="e.g. Kandukur, Nellore"
-          icon="location-outline"
-          hint="Speak your village and district name"
+      </View>
+
+      <View style={styles.formCard}>
+        <CardSection title="Location" iconName="location-outline" />
+        <LocationPicker
+          value={data.location}
+          onChange={(v) => onChange('location', v)}
         />
       </View>
     </Animated.View>
@@ -516,7 +516,8 @@ export default function PersonalInfoScreen({ navigation }) {
   const [currentStep, setCurrentStep] = useState(1);
 
   const [step1, setStep1] = useState({
-    photoUri: null, fullName: '', gender: '', age: '', mobile: '', address: '',
+    photoUri: null, fullName: '', gender: '', age: '', mobile: '',
+    location: EMPTY_LOCATION,
   });
   const [step2, setStep2] = useState({
     licenseNumber: '', licenseType: '', licenseIssueDate: '', licenseExpiry: '',
@@ -533,7 +534,10 @@ export default function PersonalInfoScreen({ navigation }) {
 
   const canProceed =
     currentStep === 1
-      ? step1.fullName.trim().length > 0 && step1.mobile.trim().length > 0
+      ? step1.fullName.trim().length > 0 &&
+        step1.mobile.trim().length > 0 &&
+        !!step1.location.stateId &&
+        !!step1.location.districtId
       : currentStep === 2
       ? step2.licenseNumber.trim().length > 0 && step2.licenseType.length > 0 && step2.vehicleTypes.length > 0
       : step3.holderName.trim().length > 0 &&

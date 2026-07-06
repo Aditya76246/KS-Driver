@@ -36,7 +36,13 @@
           "speechRecognitionPermission": "Allow KisanSahakar to use speech recognition"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow KisanSahakar to access your location to auto-fill your address"
+        }
+      ]
     ],
     "extra": {
       "eas": {
